@@ -1,0 +1,93 @@
+PROCESSING PIPELINE
+===================
+
+After some testing with the videos, we converged to the following pipeline:
+
+1/ Noise preprocessing (Thibaud, Enric)
+	- variance stabilization
+	- impulse noise removal
+	- column noise removal
+
+2/ Video stabilization (Javier, Nelson)
+
+3/ Optical flow computation (Javier, Nelson)
+
+4/ Video denoising (Javier, Nelson, Enric, Thibaud, Pablo)
+	- zoom out
+	- temporal averaging
+	- NL-Bayes
+	- NL-Bayes with fixed basis
+	- Recursive NL-Bayes
+
+
+
+DATASET
+=======
+
+L'H gave us 6 videos, summarized here (from Enric's slides):
+
+id | frames | min     max   #values | comments
+===| =======| ======================| ==============================
+Z  | 233    | 10359 - 65283 650–720 | daylight test, almost no noise
+5  | 274    | 0     - 65283     119 | very noisy, vertical artifacts
+p  | 512    | 0     - 65283      76 |
+J  | 321    | 0     - 65283      76 |
+c  | 366    | 64    -   940 28 (54) | fixed cam, horizontal lines
+m  | 476    | 64    -   940 28 (54) | shaking cam
+
+
+
+ORGANIZATION
+============
+
+We use the folder structure below to exchange data through the pipeline. 
+Some minimal rules:
+
+	* input_data is read-only, and is not in the git repo
+	* output_data contains temporary files of the pipeline
+	* everything is automatized by running shell scripts
+	* a script called "run_all.sh" runs the full pipeline on a sequence
+	* names of intermediate script are numbered and their names are verbs
+	* there is a main intermediate script for each step:
+			- 10_preprocess_noise.sh      # main script for step 1
+			- 20_stabilize_video.sh       # main script for step 2, etc
+			- 30_compute_optical_flow.sh
+			- 40_run_denoising.sh
+
+	  help scripts can be called from the step scripts:
+			- 11_remove_impulse_noise.sh
+
+	* src/ contains the source code. There is a folder for each step
+
+
+lhp
+├── input_data     # read only; not in repo
+│   ├── 5
+│   ├── c
+│   ├── J
+│   ├── m
+│   ├── p
+│   └── Z
+├── output_data          # read/write; not in repo
+│   ├── 1_preprocessing  # outputs of step 1
+│   │   ├── 5
+│   │   ├── c
+│   │   ├── J
+│   │   ├── m
+│   │   ├── p
+│   │   └── Z
+│   ├── 2_stabilization
+│   ├── 3_oflow
+│   └── 4_denoising
+├── src                 # source code
+│   ├── 1_preprocessing
+│   ├── 2_stabilization
+│   ├── 3_oflow
+│   └── 4_denoising
+├── 10_preprocess_noise.sh      # main script for step 1
+├── 11_remove_impulse_noise.sh  # helper scripts for step 1
+├── 20_stabilize_video.sh       # main script for step 2, etc
+├── 30_compute_optical_flow.sh
+├── 40_run_denoising.sh
+└── README                      # this file
+

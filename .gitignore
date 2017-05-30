@@ -1,3 +1,14 @@
+# Input and output data
+input-data/*
+output-data/*
+
+
+
+#
+# The remanaining of the file is generated automagically by github
+# for C++ projects.
+#
+
 # Prerequisites
 *.d
 
