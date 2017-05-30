@@ -1,6 +1,8 @@
 # Input and output data
-input-data/*
-output-data/*
+input_data/*
+!input_data/README
+output_data/*
+!output_data/.keep
 
 
 
