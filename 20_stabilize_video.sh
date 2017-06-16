@@ -1,11 +1,14 @@
 #! /bin/bash
 
 # check correct number of input args
-if [ "$#" -ne 1 ]; 
+if [ "$#" -lt 1 ]; 
 then
-	echo "Usage: $0 sequence-folder" >&2
+	echo "Usage: $0 sequence-folder [first-frame last-frame]" >&2
 	exit 1
 fi
+
+F=${2:-1} # first frame
+L=${3:-0} # last frame 
 
 SEQUENCE=$1
 echo "Stabilizing sequence $SEQUENCE. Output stored in output_data/2_stabilization/$SEQUENCE/"
@@ -17,20 +20,26 @@ OUTPUT_DIR="output_data/2_stabilization/$SEQUENCE"
 mkdir -p $OUTPUT_DIR
 
 # determine extension
-if [ -f "${INPUT_DIR}/001.tif" ]
+FF=$(printf %03d $F)
+if [ -f "input_data/${SEQUENCE}/${FF}.tif" ]
 then
 	EXT="tif"
-elif [ -f "${INPUT_DIR}/001.tiff" ]
+elif [ -f "input_data/${SEQUENCE}/${FF}.tiff" ]
 then
 	EXT="tiff"
-elif [ -f "${INPUT_DIR}/001.png" ]
+elif [ -f "input_data/${SEQUENCE}/${FF}.png" ]
 then
 	EXT="png"
 else
-	echo "File ${INPUT_DIR}/001.{tif,tiff,png} not found"
+	echo "File ${SEQUENCE}/${FF}.{tif,tiff,png} not found"
 	exit 1
 fi
 
-NFRAMES=$(ls $INPUT_DIR/*$EXT | wc -l)
+# determine last frame
+if [ $L -lt 1 ];
+then
+	N=$(ls $INPUT_DIR/*$EXT | wc -l)
+	L=$((F + N - 1))
+fi
 
-$STABI $INPUT_DIR/%03d.$EXT 1 $NFRAMES -1 -1 -1 -o $OUTPUT_DIR/%03d.tif 
+$STABI $INPUT_DIR/%03d.$EXT $F $L -1 -1 -1 -o $OUTPUT_DIR/%03d.tif 

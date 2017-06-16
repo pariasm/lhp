@@ -4,13 +4,15 @@
 ZF=2
 
 # check correct number of input args
-if [ "$#" -ne 1 ]; 
+if [ "$#" -lt 1 ];
 then
-	echo "Usage: $0 sequence-folder" >&2
+	echo "Usage: $0 sequence-folder [first-frame last-frame]" >&2
 	exit 1
 fi
 
-UPSA="src/utils/imscript/bin/upsa"
+F=${2:-1} # first frame
+L=${3:-0} # last frame
+
 PLAMBDA="src/utils/imscript/bin/plambda"
 
 SEQUENCE=$1
@@ -18,11 +20,22 @@ INPUT_DIR="output_data/3_oflow/$SEQUENCE/downscaled/"
 OUTPUT_DIR="output_data/3_oflow/$SEQUENCE"
 echo "	Upscaling sequence $INPUT_DIR. Output stored in $OUTPUT_DIR"
 
-# for now, we just create sym links in the output folder
+# determine last frame
+if [ $L -lt 1 ];
+then
+	N=$(ls $INPUT_DIR/*.tif | wc -l)
+	L=$((F + N - 1))
+fi
+
+# upsample optical flow
+UPSA="src/utils/imscript/bin/upsa"
 mkdir -p $OUTPUT_DIR
-for i in $(ls ${INPUT_DIR}/*flo);
+for i in $(seq $F $L)
 do
-	$UPSA $ZF 2 $i $OUTPUT_DIR/$(basename $i)
-	$PLAMBDA $OUTPUT_DIR/$(basename $i) "x $ZF *" -o $OUTPUT_DIR/$(basename $i)
+	N=$(printf %03d $i)
+	$UPSA $ZF 2 $INPUT_DIR/$N.f.flo $OUTPUT_DIR/$N.f.flo
+	$UPSA $ZF 2 $INPUT_DIR/$N.b.flo $OUTPUT_DIR/$N.b.flo
+	$PLAMBDA $OUTPUT_DIR/$N.f.flo "x $ZF *" -o $OUTPUT_DIR/$N.f.flo
+	$PLAMBDA $OUTPUT_DIR/$N.b.flo "x $ZF *" -o $OUTPUT_DIR/$N.b.flo
 done
 

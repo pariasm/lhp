@@ -1,18 +1,21 @@
 #! /bin/bash
 
 # check correct number of input args
-if [ "$#" -ne 1 ]; 
+if [ "$#" -lt 1 ]; 
 then
-	echo "Usage: $0 sequence-folder" >&2
+	echo "Usage: $0 sequence-folder [first-frame last-frame]" >&2
 	exit 1
 fi
+
+F=${2:-1} # first frame
+L=${3:-0} # last frame 
 
 SEQUENCE=$1
 
 echo "Running full pipeline for sequence $SEQUENCE"
 
 
-./10_preprocess_noise.sh $SEQUENCE
-./20_stabilize_video.sh $SEQUENCE
-./30_compute_optical_flow.sh $SEQUENCE
-./40_run_denoising.sh $SEQUENCE
+./10_preprocess_noise.sh $SEQUENCE $F $L
+./20_stabilize_video.sh $SEQUENCE $F $L
+./30_compute_optical_flow.sh $SEQUENCE $F $L
+./40_run_denoising.sh $SEQUENCE $F $L

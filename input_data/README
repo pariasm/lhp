@@ -12,8 +12,8 @@ J  | 321    | 0     - 65283      76 |                               | origin/pre
 c  | 366    | 64    -   940 28 (54) | fixed cam, horizontal lines   | cam_fixe_cible_de_face_T399240us_G1256
 m  | 476    | 64    -   940 28 (54) | shaking cam                   | main_levee_cible_mobile_T399240us_G1256
 
-p : from frame 51 to 400 the sequence is shaky, but steadier
-m : from frame 81 to 450 idem
+p : from frame 51 to 400 the sequence is shaky, but steadier ~> using  61 to 400
+m : from frame 81 to 450 idem                                ~> using 101 to 440
 
 On png16 there are 5 videos sent on the 13/04 that should be equal to the tiff
 videos from the 09/04. It seems they are not the same.
