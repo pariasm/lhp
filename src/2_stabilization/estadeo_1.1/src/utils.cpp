@@ -10,6 +10,35 @@
 #include <stdio.h>
 #include "LibVideoT.hpp"
 
+/**
+  *
+  *  Function to get the frame size
+  * 
+**/
+size_t get_frame_size(
+  char *name,       //file name
+  int first,        //first frame number
+  int &width,       //size of the video
+  int &height,      //size of the video
+  int &channels     //size of the video
+) 
+{
+	Video<float> input;
+	input.loadVideo(name, first, first);
+
+	if(input.sz.channels != 1)
+	{
+		printf("Requires only 1 channel for this version\n");
+		return 0;
+	}
+
+	width = input.sz.width;
+	height = input.sz.height;
+	channels = input.sz.channels;
+
+	return width * height * channels;
+}
+
 
 /**
   *

@@ -4,6 +4,19 @@
 #include <stdlib.h>
 //#include "LibVideoT.hpp"
 
+/**
+  *
+  *  Function to get the frame size
+  * 
+**/
+size_t get_frame_size(
+  char *name,       //file name
+  int first,        //first frame number
+  int &width,       //size of the video
+  int &height,      //size of the video
+  int &channels     //size of the video
+);
+
 size_t read_video(
   char *name,       //file name
   int first,

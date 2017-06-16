@@ -235,9 +235,17 @@ int main (int argc, char *argv[])
         &out_smooth_transform, width, height, nframes, motion_type, nparams,
         smooth_strategy, sigma, boundary_condition, postprocessing, verbose
       );
-  
+
   if(result)
   {
+
+    // default values for output size (equal to input size)
+    if (nframes < 0) nframes = last - first + 1;
+    if (width < 0 || height < 0 || nchannels < 0)
+    {
+      size_t r=get_frame_size(video_in, first, width, height, nchannels);
+      nchannels = 3; // FIXME very ugly
+    }
 
     if(verbose)
       printf(
@@ -247,13 +255,14 @@ int main (int argc, char *argv[])
         video_in, video_out, width, height, nframes, motion_type, nparams,
         smooth_strategy, sigma, boundary_condition, postprocessing
       );
-    
+
+    // allocate video
     int size=width*height*nchannels*nframes;
     //unsigned char *I=new unsigned char[size];
     float *If=new float[size];
-   
+
     size_t r=read_video(video_in, first, last, If, size);
-    
+
     if(r<=0)
     {
       fprintf(stderr, "Error: Cannot read the input video '%s'.\n", video_in);
@@ -267,7 +276,7 @@ int main (int argc, char *argv[])
     //float *If=new float[size];
     //for(int i=0; i<size; i++)
     //  If[i]=(float)I[i];
-    
+
     if(verbose)
       printf("\n Starting the stabilization\n");
 
