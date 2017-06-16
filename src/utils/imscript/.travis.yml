@@ -1,0 +1,9 @@
+language: c
+
+matrix:
+  include:
+    - os: linux
+    - os: osx
+
+script:
+  - make test
