@@ -10,15 +10,10 @@ fi
 SEQUENCE=$1
 echo "Stabilizing sequence $SEQUENCE. Output stored in output_data/2_stabilization/$SEQUENCE/"
 
+STABI="src/2_stabilization/estadeo_1.1/bin/estadeo"
 
-# for now, we just create sym links in the output folder
 INPUT_DIR="output_data/1_preprocessing/$SEQUENCE"
 OUTPUT_DIR="output_data/2_stabilization/$SEQUENCE"
 mkdir -p $OUTPUT_DIR
-BASE_DIR=$(pwd)
-cd $OUTPUT_DIR
-for i in $(ls ${BASE_DIR}/${INPUT_DIR}/*tif);
-do
-	ln -s $i
-done
-cd -
+
+$STABI $INPUT_DIR/%03d.tif 1 300 -1 -1 -1 -o $OUTPUT_DIR/%03d.tif 
