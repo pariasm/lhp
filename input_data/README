@@ -7,11 +7,13 @@ id | frames | min     max   #values | comments                      | filename
 ===| =======| ======================| ==============================| ==============================
 Z  | 233    | 10359 - 65283 650–720 | daylight test, almost no noise| origin/premiere_camera/ZIzghPzbNUdlSyH.mov
 5  | 274    | 0     - 65283     119 | very noisy, vertical artifacts| origin/premiere_camera/5taYHWaKAFF4t8M.mov
-p  | 512    | 0     - 65283      76 |                               | origin/premiere_camera/pFYGVaVHDADw4N1.mov
+p  | 512    | 0     - 65283      76 | shaking cam                   | origin/premiere_camera/pFYGVaVHDADw4N1.mov
 J  | 321    | 0     - 65283      76 |                               | origin/premiere_camera/JXJF6vn2ODcnj0N.mov
 c  | 366    | 64    -   940 28 (54) | fixed cam, horizontal lines   | cam_fixe_cible_de_face_T399240us_G1256
 m  | 476    | 64    -   940 28 (54) | shaking cam                   | main_levee_cible_mobile_T399240us_G1256
 
+p : from frame 51 to 400 the sequence is shaky, but steadier
+m : from frame 81 to 450 idem
 
 On png16 there are 5 videos sent on the 13/04 that should be equal to the tiff
 videos from the 09/04. It seems they are not the same.
