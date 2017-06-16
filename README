@@ -93,3 +93,16 @@ lhp
 
 
 
+BUILDING
+========
+
+The code in src/ is comprised of different independent projects in C/C++. Each
+of them has to be compiled independently (this should change in the future). Some
+work with plain Makefiles, others use cmake (for the moment these are only the 
+denoising codes).
+
+Some codes have an individual README file explaining how to compile it. In this
+case follow the instructions given in the README file. If there's no readme file,
+just type make in the projects folder.
+
+
