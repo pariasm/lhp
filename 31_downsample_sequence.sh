@@ -18,7 +18,7 @@ OUTPUT_DIR="output_data/3_oflow/$SEQUENCE/downscaled/"
 INPUT_DIR="output_data/2_stabilization/$SEQUENCE"
 echo "	Downscaling sequence $INPUT_DIR. Output stored in $OUTPUT_DIR"
 
-# for now, we just create sym links in the output folder
+# downsample the sequence
 mkdir -p $OUTPUT_DIR
 BASE_DIR=$(pwd)
 for i in $(ls ${BASE_DIR}/${INPUT_DIR}/*tif);
