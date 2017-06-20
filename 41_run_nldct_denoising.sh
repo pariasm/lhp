@@ -34,14 +34,14 @@ mkdir -p $OUTPUT_DIR
 $DENO \
 -i ${INPUT_DIR}/%03d.tif -f $F -l $L -sigma 10 -has-noise \
 -px2 0 -px1 3 -pt1 2 -wx1 54 -wt1 6 -np1 120 \
--bsic ${OUTPUT_DIR}/b2_%03d.tif
+-bsic ${OUTPUT_DIR}/b_%03d.tif
 
 # run denoising (second step)
 $DENO \
 -i ${INPUT_DIR}/%03d.tif -f $F -l $L -sigma 1 -has-noise \
--b ${OUTPUT_DIR}/b2_%03d.tif -f $F -l $L -sigma 1 -has-noise \
+-b ${OUTPUT_DIR}/b_%03d.tif -f $F -l $L -sigma 1 -has-noise \
 -px1 0 -px2 3 -pt2 2 -wx2 54 -wt2 6 -np2 60 \
--deno ${OUTPUT_DIR}/d2_%03d.tif
+-deno ${OUTPUT_DIR}/d_%03d.tif
 
 # clean
 rm {bsic,diff}_???.png
