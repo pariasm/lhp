@@ -1,0 +1,86 @@
+DATASET
+=======
+
+L'H gave us 6 videos, summarized here (from Enric's slides):
+
+id | frames | min     max   #values | comments                      | filename                         
+===| =======| ======================| ==============================| ==============================
+Z  | 233    | 10359 - 65283 650–720 | daylight test, almost no noise| origin/premiere_camera/ZIzghPzbNUdlSyH.mov
+5  | 274    | 0     - 65283     119 | very noisy, vertical artifacts| origin/premiere_camera/5taYHWaKAFF4t8M.mov
+p  | 512    | 0     - 65283      76 | shaking cam                   | origin/premiere_camera/pFYGVaVHDADw4N1.mov
+J  | 321    | 0     - 65283      76 |                               | origin/premiere_camera/JXJF6vn2ODcnj0N.mov
+c  | 366    | 64    -   940 28 (54) | fixed cam, horizontal lines   | cam_fixe_cible_de_face_T399240us_G1256
+m  | 476    | 64    -   940 28 (54) | shaking cam                   | main_levee_cible_mobile_T399240us_G1256
+
+p : from frame 51 to 400 the sequence is shaky, but steadier ~> using  61 to 400
+m : from frame 81 to 450 idem                                ~> using 101 to 440
+
+On png16 there are 5 videos sent on the 13/04 that should be equal to the tiff
+videos from the 09/04. It seems they are not the same.
+
+
+09/04/2017: Z,5,p,J where shared with us with this email
+
+	Bonjour,
+
+	Voici les liens sur le cloud du LIP6 pour récupérer les vidéo (de 1.5 a
+	2.8 Go). Boris et Andrea pourront en dire plus sur le format (10b, non
+	compressé, + chrominance, ...) et sur les conditions de prise de vue
+	bonne reception
+
+	https://cloud.lip6.fr/index.php/s/ZIzghPzbNUdlSyH
+	https://cloud.lip6.fr/index.php/s/5taYHWaKAFF4t8M
+	https://cloud.lip6.fr/index.php/s/pFYGVaVHDADw4N1
+	https://cloud.lip6.fr/index.php/s/JXJF6vn2ODcnj0N
+
+	Cordialement,
+	Lionel Lacassagne
+
+
+09/04/2017: the sequences in 16 bits png were sent to us
+	    TODO: are these sequences exactly equal to the previous tiffs?
+
+
+	Bonjour,
+
+	Vous trouverez dans ce mail les liens des séquences précédemment
+	envoyées, mais cette fois-ci dans le format PNG. Cela nous permet de
+	réduire la taille des vidéos de façon non destructive.
+	Attention les images sont en nuances de gris sur 16bits/pixel.
+
+	https://cloud-soc.lip6.fr/owncloud/index.php/s/LSavnMsPjWjzX89
+	https://cloud-soc.lip6.fr/owncloud/index.php/s/qvAovshYCZ3zv1Z
+	https://cloud-soc.lip6.fr/owncloud/index.php/s/mUXh0QisMQNGYLB
+	https://cloud-soc.lip6.fr/owncloud/index.php/s/xZGbM0vw9SgBUkZ
+	https://cloud-soc.lip6.fr/owncloud/index.php/s/yiJoq2VyPXwXLWB
+	
+	A noter également, nous prévoyons de profiter de la prochaine nouvelle
+	Lune pour effectuer d'autres prises de vue le 26 avril prochain. Nous
+	pourrons alors réellement mettre en difficulté la caméra.
+	D'autres séquences plus bruitées pourrons alors vous être transmises.
+	
+	Bien cordialement,
+	Andrea Petreto
+
+
+11/05/2017: m and c sequences with a different camera
+
+	Bonjour messieurs,
+
+	Avec un peu de retard, voici des liens vers d'autres vidéos prisent
+	avec une caméra différente. D'autres encore suivront avec notamment des
+	exemples de limite caméra.
+
+	NB: en attendant la mise en place d'un cloud commun. Pouvez vous s'il
+	vous plaît me tenir informé lorsque vous avez récupérée  les vidéos
+	pour que je puisse libérer l'espace et en ajouter de nouvelles?
+
+	https://cloud-soc.lip6.fr/owncloud/index.php/s/RTfxkiYfV3FBIMI
+	https://cloud-soc.lip6.fr/owncloud/index.php/s/K533tGPAIjQhg39
+
+	En  vous souhaitant bonne réception
+
+	Bien cordialement,
+	Andrea Petreto
+
+
