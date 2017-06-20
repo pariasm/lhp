@@ -21,3 +21,14 @@ then
 	N=$(ls $INPUT_DIR/*.tif | wc -l)
 	L=$((F + N - 1))
 fi
+
+# call different denoisers
+
+# nldct
+./41_run_nldct_denoising.sh $SEQUENCE $F $L
+
+# nlbayes
+
+# r-nlbayes
+
+# etc...
