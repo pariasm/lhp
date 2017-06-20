@@ -1,1 +1,0 @@
-../bilinear_interpolation.c
