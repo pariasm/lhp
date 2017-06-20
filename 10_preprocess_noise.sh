@@ -41,8 +41,8 @@ OUTPUT_DIR="output_data/1_preprocessing/$SEQUENCE"
 mkdir -p $OUTPUT_DIR
 BASE_DIR=$(pwd)
 cd $OUTPUT_DIR
-for i in $(seq $F $L) 
+for i in $(seq -w $F $L) 
 do
-	ln -s ${BASE_DIR}/input_data/${SEQUENCE}/$(printf %03d $i).$EXT
+	ln -s ${BASE_DIR}/input_data/${SEQUENCE}/$i.$EXT i$i.$EXT
 done
 cd -

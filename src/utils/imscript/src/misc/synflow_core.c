@@ -1,1 +1,0 @@
-../synflow_core.c

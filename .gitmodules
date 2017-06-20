@@ -1,0 +1,3 @@
+[submodule "src/utils/imscript"]
+	path = src/utils/imscript
+	url = https://github.com/mnhrdt/imscript.git
