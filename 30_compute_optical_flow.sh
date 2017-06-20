@@ -33,3 +33,7 @@ FLOW_DIR="output_data/3_oflow/$SEQUENCE/downscaled/"
 
 # upsample to full resolution
 ./33_upsample_oflow.sh $SEQUENCE $F $L
+
+
+# clean intermediate data
+rm -rf $FLOW_DIR
