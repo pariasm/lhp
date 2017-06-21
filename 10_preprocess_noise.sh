@@ -1,5 +1,7 @@
 #! /bin/bash
 
+NUM_PROCS=30
+
 # check correct number of input args
 if [ "$#" -lt 1 ]; 
 then
@@ -41,8 +43,11 @@ OUTPUT_DIR="output_data/1_preprocessing/$SEQUENCE"
 mkdir -p $OUTPUT_DIR
 BASE_DIR=$(pwd)
 cd $OUTPUT_DIR
-for i in $(seq -w $F $L) 
+for i in $(seq -f "%03g" $F $L)
 do
 	ln -s ${BASE_DIR}/input_data/${SEQUENCE}/$i.$EXT i$i.$EXT
 done
 cd -
+
+cp preprocess.mk $OUTPUT_DIR/Makefile
+make -C $OUTPUT_DIR -j $NUM_PROCS
