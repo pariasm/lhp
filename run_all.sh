@@ -14,6 +14,8 @@ SEQUENCE=$1
 
 echo "Running full pipeline for sequence $SEQUENCE"
 
+export PATH=`pwd`/bin/:$PATH
+
 
 ./10_preprocess_noise.sh $SEQUENCE $F $L
 ./20_stabilize_video.sh $SEQUENCE $F $L
