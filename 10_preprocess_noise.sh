@@ -62,6 +62,26 @@ do
 done
 cd -
 
+# scale outputs to approx 0 255 range (required for stabilization)
+
+# first compute the 1%-99% range for a bunch of images
+S=5 # step
+for i in $(seq -f "%03g" $F $S $L)
+do
+	imprintf "%q[1] %q[99]\n" $OUTPUT_DIR/$i.$EXT >> $OUTPUT_DIR/s_m_ub_lin_iranges.txt
+done
+
+awk '{for (i=1;i<=NF;i++){a[i]+=$i;}} END {for (i=1;i<=NF;i++){printf "%f ", a[i]/NR;}; printf "\n"}' \
+	$OUTPUT_DIR/s_m_ub_lin_iranges.txt > \
+	$OUTPUT_DIR/s_m_ub_lin_irange.txt
+
+
+RANGE=$(cat $OUTPUT_DIR/s_m_ub_lin_irange.txt)
+for i in $(seq -f "%03g" $F $L)
+do
+	plambda $OUTPUT_DIR/$i.$EXT "$RANGE range 255 *" -o $OUTPUT_DIR/$i.$EXT
+done
+
 # run ponomarenko's noise estimator
 ./11_estimate_noise.sh $SEQUENCE $F $L
 
