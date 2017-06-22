@@ -1,6 +1,7 @@
 #! /bin/bash
 
 NUM_PROCS=30
+export PATH=`pwd`/bin/:$PATH
 
 # check correct number of input args
 if [ "$#" -lt 1 ]; 
@@ -34,7 +35,7 @@ fi
 # determine last frame
 if [ $L -lt 1 ];
 then
-	L=$(ls input_data/$SEQUENCE/*$EXT | wc -l)
+	L=$(ls input_data/$SEQUENCE/???.$EXT | wc -l)
 fi
 
 
@@ -51,3 +52,17 @@ cd -
 
 cp preprocess.mk $OUTPUT_DIR/Makefile
 make -C $OUTPUT_DIR -j $NUM_PROCS
+
+# change name of enric's output files to match next scripts
+BASE_DIR=$(pwd)
+cd $OUTPUT_DIR
+for i in $(seq -f "%03g" $F $L)
+do
+	ln -s s_m_ub_lin_i$i.$EXT $i.$EXT
+done
+cd -
+
+# run ponomarenko's noise estimator
+./11_estimate_noise.sh $SEQUENCE $F $L
+
+

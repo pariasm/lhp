@@ -21,7 +21,7 @@ echo "	Downscaling sequence $INPUT_DIR. Output stored in $OUTPUT_DIR"
 # determine last frame
 if [ $L -lt 1 ];
 then
-	N=$(ls $INPUT_DIR/*.tif | wc -l)
+	N=$(ls $INPUT_DIR/???.tif | wc -l)
 	L=$((F + N - 1))
 fi
 

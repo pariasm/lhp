@@ -33,26 +33,29 @@ fi
 # determine last frame
 if [ $L -lt 1 ];
 then
-	L=$(ls input_data/$SEQUENCE/*$EXT | wc -l)
+	L=$(ls input_data/$SEQUENCE/???.$EXT | wc -l)
 fi
 
 
 PONO=src/1_preprocessing/ponomarenko/ponomarenko
 CONVICON=src/utils/convicon/bin/convicon
 
+# step (only run ponomarenko in 1/S of the frames)
+S=10
+
 INPUT_DIR="output_data/1_preprocessing/$SEQUENCE"
 SIGMAS="output_data/1_preprocessing/$SEQUENCE/sigmas.txt"
 OUTPUT="output_data/1_preprocessing/$SEQUENCE/sigma.txt"
-for i in $(seq -f "%03g" $F $L)
+for i in $(seq -f "%03g" $F $S $L)
 do
 	# convert from tif to RGB
 	$CONVICON -i $INPUT_DIR/$i.tif -o $INPUT_DIR/tmp.RGB
 
 	# run ponomarenko's noise estimator with a single bin
 	$PONO -b 1 $INPUT_DIR/tmp.RGB | awk '{print $2}' >> $SIGMAS
-done
+done | parallel
 
 # compute average sigma
 awk '{s+=$1} END {print s/NR}' RS=" " $SIGMAS > $OUTPUT
-rm -f $SIGMAS $INPUT_DIR/tmp.RGB
+rm -f $INPUT_DIR/tmp.RGB
 

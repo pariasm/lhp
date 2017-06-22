@@ -38,7 +38,7 @@ fi
 # determine last frame
 if [ $L -lt 1 ];
 then
-	N=$(ls $INPUT_DIR/*$EXT | wc -l)
+	N=$(ls $INPUT_DIR/???.$EXT | wc -l)
 	L=$((F + N - 1))
 fi
 
