@@ -1,5 +1,7 @@
 #! /bin/bash
 
+BANDS_DIR="horizontal"
+
 NUM_PROCS=30
 export PATH=`pwd`/bin/:$PATH
 
@@ -51,7 +53,7 @@ done
 cd -
 
 cp preprocess.mk $OUTPUT_DIR/Makefile
-make -C $OUTPUT_DIR -j $NUM_PROCS
+make BANDS_DIRECTION=$BANDS_DIR -C $OUTPUT_DIR -j $NUM_PROCS
 
 # change name of enric's output files to match next scripts
 BASE_DIR=$(pwd)

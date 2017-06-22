@@ -9,6 +9,7 @@ all: $(FILLED)
 # linearization: contrast change to achieve linear scaling of gray values
 lin_i%.tif: i%.tif
 	plambda $^ vavg\ log -o $@
+#	ln -s $^ $@ # this is for already stabilized data
 
 # pointwise average of linearized images
 avg_lin.tif: $(LINEAR)
@@ -28,7 +29,16 @@ avg_lin.png: avg_lin.tif range.txt
 
 # remove bands using Yohann's program
 ub_avg_lin.png: avg_lin.png
+ifeq ($(BANDS_DIRECTION),horizontal)
+	# transpose
+	imflip transpose $< $<
+endif
 	demo_MIRE $< $@
+ifeq ($(BANDS_DIRECTION),horizontal)
+	# invert transposition
+	imflip transpose $< $<
+	imflip transpose $@ $@
+endif
 
 # extract image of bands
 bands.tif: avg_lin.png ub_avg_lin.png range.txt
