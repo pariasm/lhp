@@ -44,7 +44,18 @@ endif
 bands.tif: avg_lin.png ub_avg_lin.png range.txt
 	plambda ub_avg_lin.png "`cat range.txt` iqe" -o ub_avg_lin.tif
 	plambda avg_lin.tif ub_avg_lin.tif - -o bands2d.tif
+ifeq ($(BANDS_DIRECTION),horizontal)
+	# transpose
+	imflip transpose bands2d.tif bands2d.tif
+	imflip transpose avg_lin.tif avg_lin.tif
+endif
 	veco -c med bands2d.tif | plambda avg_lin.tif - "" -o bands.tif
+ifeq ($(BANDS_DIRECTION),horizontal)
+	# invert transposition
+	imflip transpose bands2d.tif bands2d.tif
+	imflip transpose avg_lin.tif avg_lin.tif
+	imflip transpose bands.tif bands.tif
+endif
 
 # remove bands from each frame
 ub_lin_i%.tif: lin_i%.tif bands.tif

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-BANDS_DIR="horizontal"
+BANDS_DIR="vertical"
 
 NUM_PROCS=30
 export PATH=`pwd`/bin/:$PATH
