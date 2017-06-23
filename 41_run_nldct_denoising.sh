@@ -34,7 +34,8 @@ mkdir -p $OUTPUT_DIR
 # run denoising (first step)
 $DENO \
 -i ${INPUT_DIR}/%03d.tif -f $F -l $L -sigma $SIGMA -has-noise \
--px2 0 -px1 3 -pt1 2 -wx1 54 -wt1 6 -np1 120 \
+-fof ${OFLOW_DIR}/%03d.f.flo -bof ${OFLOW_DIR}/%03d.b.flo \
+-px2 0 -px1 16 -pt1 3 -wx1 54 -wt1 6 -np1 240 -b1 2.0 \
 -bsic ${OUTPUT_DIR}/b_%03d.tif
 
 mv measures.txt ${OUTPUT_DIR}/measures_basic
@@ -43,11 +44,11 @@ mv measures.txt ${OUTPUT_DIR}/measures_basic
 $DENO \
 -i ${INPUT_DIR}/%03d.tif -f $F -l $L -sigma $SIGMA -has-noise \
 -b ${OUTPUT_DIR}/b_%03d.tif \
--px1 0 -px2 3 -pt2 2 -wx2 54 -wt2 6 -np2 60 \
+-fof ${OFLOW_DIR}/%03d.f.flo -bof ${OFLOW_DIR}/%03d.b.flo \
+-px1 0 -px2 16 -pt2 3 -wx2 54 -wt2 6 -np2 120 \
 -deno ${OUTPUT_DIR}/d_%03d.tif
 
 # clean
 rm {bsic,diff}_???.png
 mv measures.txt ${OUTPUT_DIR}/measures
-
 
