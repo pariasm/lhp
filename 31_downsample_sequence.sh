@@ -28,11 +28,9 @@ fi
 # downsample the sequence
 DOWNSA="src/utils/imscript/bin/downsa"
 mkdir -p $OUTPUT_DIR
-BASE_DIR=$(pwd)
-for i in $(seq $F $L)
+for i in $(seq -f "%03g" $F $L)
 do
-	N=$(printf %03d $i)
-	$DOWNSA v $ZF ${INPUT_DIR}/$N.tif $OUTPUT_DIR/$N.tif
+	$DOWNSA v $ZF ${INPUT_DIR}/$i.tif $OUTPUT_DIR/$i.tif
 done
 
 
