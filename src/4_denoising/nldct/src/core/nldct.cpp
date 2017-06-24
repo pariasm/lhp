@@ -3527,15 +3527,22 @@ float computeBayesEstimateStep2(
 	 * */
 
 	const unsigned sPC  = p_params.sizePatch * p_params.sizePatch
-	                    * p_params.sizePatchTime * p_size.channels;
+	                    * p_params.sizePatchTime;
 
-	for (unsigned c = 0; c < io_groupNoisy.size(); c++)
+	for (unsigned c = 0; c < p_size.channels; c++)
 	for (unsigned j = 0; j < sPC; j++)
 	{
+#ifdef USE_FFTW
+		float v = io_groupNoisy[j];
+		for (unsigned i = 1; i < p_nSimP; i++)
+			if (v != io_groupNoisy[j + i * sPC])
+				goto not_equal;
+#else
 		float v = io_groupNoisy[j * p_nSimP];
 		for (unsigned i = 1; i < p_nSimP; i++)
 			if (v != io_groupNoisy[j * p_nSimP + i])
 				goto not_equal;
+#endif
 	}
 
 	//! All patches are equal ~ do nothing
