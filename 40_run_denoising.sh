@@ -29,9 +29,10 @@ cp output_data/1_preprocessing/$SEQUENCE/sigma.txt $INPUT_DIR/
 # call different denoisers
 
 # nldct
-./41_run_nldct_denoising.sh $SEQUENCE $F $L
+# ./41_run_nldct_denoising.sh $SEQUENCE $F $L
 
 # nlbayes
+./41_run_nlbayes_denoising.sh $SEQUENCE $F $L
 
 # r-nlbayes
 
