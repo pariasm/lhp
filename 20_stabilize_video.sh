@@ -43,3 +43,6 @@ then
 fi
 
 $STABI $INPUT_DIR/%03d.$EXT $F $L -1 -1 -1 -o $OUTPUT_DIR/%03d.tif 
+
+# clean
+rm $INPUT_DIR/*.tif

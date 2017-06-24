@@ -56,7 +56,6 @@ cp preprocess.mk $OUTPUT_DIR/Makefile
 make BANDS_DIRECTION=$BANDS_DIR -C $OUTPUT_DIR -j $NUM_PROCS
 
 # change name of enric's output files to match next scripts
-BASE_DIR=$(pwd)
 cd $OUTPUT_DIR
 for i in $(seq -f "%03g" $F $L)
 do
@@ -64,10 +63,18 @@ do
 done
 cd -
 
+# downsample the sequence
+DOWNSA="src/utils/imscript/bin/downsa"
+ZF=2
+for i in $(seq -f "%03g" $F $L)
+do
+	$DOWNSA v $ZF $OUTPUT_DIR/$i.tif $OUTPUT_DIR/$i.tif
+done | parallel
+
 # scale outputs to approx 0 255 range (required for stabilization)
 
 # first compute the 1%-99% range for a bunch of images
-S=5 # step
+S=10 # step
 for i in $(seq -f "%03g" $F $S $L)
 do
 	imprintf "%q[1] %q[99]\n" $OUTPUT_DIR/$i.$EXT >> $OUTPUT_DIR/s_m_ub_lin_iranges.txt
@@ -82,7 +89,7 @@ RANGE=$(cat $OUTPUT_DIR/s_m_ub_lin_irange.txt)
 for i in $(seq -f "%03g" $F $L)
 do
 	plambda $OUTPUT_DIR/$i.$EXT "$RANGE range 255 *" -o $OUTPUT_DIR/$i.$EXT
-done
+done | parallel
 
 # run ponomarenko's noise estimator
 ./11_estimate_noise.sh $SEQUENCE $F $L
