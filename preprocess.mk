@@ -71,7 +71,7 @@ global_mask.png: std_ub_lin.tif
 
 # apply global and local masks
 m_ub_%.tif: ub_%.tif global_mask.png
-	plambda $^ "x x%W5000 > x x%W995000 < and y and x nan if" -o $@
+	plambda $^ "x x%W2000 > x x%W998000 < and y and x nan if" -o $@
 
 # inpaint remaining holes
 s_m_%.tif: m_%.tif
