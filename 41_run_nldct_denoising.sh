@@ -24,12 +24,12 @@ then
 	L=$((F + N - 1))
 fi
 
-# nldct binary
-DENO="src/4_denoising/nldct/build/bin/vnlbayes"
-SIGMA=$(cat "output_data/1_preprocessing/$SEQUENCE/sigma.txt")
-
 # create directory
 mkdir -p $OUTPUT_DIR
+
+# nldct binary
+DENO="src/4_denoising/nldct/build/bin/vnlbayes"
+SIGMA=$(cat "$INPUT_DIR/sigma.txt")
 
 # run denoising (first step)
 $DENO \

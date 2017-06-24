@@ -22,6 +22,10 @@ then
 	L=$((F + N - 1))
 fi
 
+## # run ponomarenko's noise estimator
+#./41_estimate_noise.sh $SEQUENCE $F $L
+cp output_data/1_preprocessing/$SEQUENCE/sigma.txt $INPUT_DIR/
+
 # call different denoisers
 
 # nldct
