@@ -78,6 +78,8 @@
  * in the first step)*/
 //#define FAT_ORIGINAL
 
+#define L1DISTANCE
+
 
 #include "../Utilities/LibVideoT.hpp"
 #include "../Utilities/Utilities.h"

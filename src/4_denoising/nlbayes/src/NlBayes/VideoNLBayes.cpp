@@ -456,6 +456,9 @@ std::vector<float> runNlBayes(
 #ifdef LI_ZHANG_DAI
 		printf(ANSI_BCYN "LI_ZHANG_DAI > Using Li-Zhang-Dai's signal estimate for empirical Wiener.\n" ANSI_RST);
 #endif
+#ifdef L1DISTANCE
+		printf(ANSI_BCYN "L1DISTANCE > L1 patch distance (both steps).\n" ANSI_RST);
+#endif
 #ifdef BARICENTER_BASIC
 		printf(ANSI_BCYN "BARICENTER_BASIC > Centering noisy patches with basic baricenter.\n" ANSI_RST);
 #endif
@@ -1316,8 +1319,13 @@ unsigned estimateSimilarPatchesStep1(
 			for (int ht = 0; ht < sPt; ht++)
 			for (int hy = 0; hy < sPx; hy++)
 			for (int hx = 0; hx < sPx; hx++)
+#ifndef L1DISTANCE
 				dist += (dif = (*p_im)(px + hx, py + hy, pt + ht)
 				             - (*p_im)(qx + hx, qy + hy, qt + ht)) * dif;
+#else
+				dist += fabs((*p_im)(px + hx, py + hy, pt + ht)
+				           - (*p_im)(qx + hx, qy + hy, qt + ht));
+#endif
 	
 			//! Save distance and corresponding patch index
 			distance[nsrch++] = std::make_pair(dist, sz.index(qx, qy, qt, 0));
@@ -1777,8 +1785,13 @@ unsigned estimateSimilarPatchesStep2(
 			for (int ht = 0; ht < sPt; ht++)
 			for (int hy = 0; hy < sPx; hy++)
 			for (int hx = 0; hx < sPx; hx++)
+#ifdef L1DISTANCE
 				dist += (dif = (*p_im)(px + hx, py + hy, pt + ht, c)
 				             - (*p_im)(qx + hx, qy + hy, qt + ht, c) ) * dif;
+#else
+				dist += fabs( (*p_im)(px + hx, py + hy, pt + ht, c)
+				            - (*p_im)(qx + hx, qy + hy, qt + ht, c) );
+#endif
 	
 			//! Save distance and corresponding patch index
 			distance[nsrch++] = std::make_pair(dist, sz.index(qx, qy, qt, 0));
