@@ -11,7 +11,11 @@ F=${2:-1} # first frame
 L=${3:-0} # last frame
 
 SEQUENCE=$1
-echo "	Estimating noise for sequence $SEQUENCE. Output stored in output_data/1_preprocessing/$SEQUENCE/sigma.txt"
+INPUT_DIR="output_data/1_preprocessing/$SEQUENCE"
+SIGMAS="output_data/1_preprocessing/$SEQUENCE/sigmas.txt"
+OUTPUT="output_data/1_preprocessing/$SEQUENCE/sigma.txt"
+
+echo "	Estimating noise for sequence $SEQUENCE. Output stored in $OUTPUT"
 
 
 # determine extension
@@ -39,17 +43,19 @@ fi
 
 PONO=src/1_preprocessing/ponomarenko/ponomarenko
 CONVICON=src/utils/convicon/bin/convicon
+DOWNSA="src/utils/imscript/bin/downsa"
+ZF=4
 
 # step (only run ponomarenko in 1/S of the frames)
 S=10
 
-INPUT_DIR="output_data/1_preprocessing/$SEQUENCE"
-SIGMAS="output_data/1_preprocessing/$SEQUENCE/sigmas.txt"
-OUTPUT="output_data/1_preprocessing/$SEQUENCE/sigma.txt"
 for i in $(seq -f "%03g" $F $S $L)
 do
+	# downsample to simulate the coarse-scale noise
+ 	$DOWNSA v $ZF $INPUT_DIR/$i.tif $INPUT_DIR/tmp.tif
+
 	# convert from tif to RGB
-	$CONVICON -i $INPUT_DIR/$i.tif -o $INPUT_DIR/tmp.RGB
+	$CONVICON -i $INPUT_DIR/tmp.tif -o $INPUT_DIR/tmp.RGB
 
 	# run ponomarenko's noise estimator with a single bin
 	$PONO -b 1 $INPUT_DIR/tmp.RGB | awk '{print $2}' >> $SIGMAS
@@ -57,5 +63,5 @@ done | parallel
 
 # compute average sigma
 awk '{s+=$1} END {print s/NR}' RS=" " $SIGMAS > $OUTPUT
-rm -f $INPUT_DIR/tmp.RGB
+rm -f $INPUT_DIR/tmp.RGB $INPUT_DIR/tmp.RGB
 

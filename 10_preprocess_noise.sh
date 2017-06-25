@@ -63,13 +63,13 @@ do
 done
 cd -
 
-# downsample the sequence
-DOWNSA="src/utils/imscript/bin/downsa"
-ZF=2
-for i in $(seq -f "%03g" $F $L)
-do
-	$DOWNSA v $ZF $OUTPUT_DIR/$i.tif $OUTPUT_DIR/$i.tif
-done | parallel
+# # downsample the sequence
+# DOWNSA="src/utils/imscript/bin/downsa"
+# ZF=2
+# for i in $(seq -f "%03g" $F $L)
+# do
+# 	$DOWNSA v $ZF $OUTPUT_DIR/$i.tif $OUTPUT_DIR/$i.tif
+# done | parallel
 
 # scale outputs to approx 0 255 range (required for stabilization)
 
