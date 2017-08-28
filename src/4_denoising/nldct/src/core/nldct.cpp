@@ -1542,8 +1542,8 @@ unsigned estimateSimilarPatchesStep1(
 				int ct0 = ct[dt - dir];
 				float cx_f = cx0 + (use_flow ? (dir > 0 ? fflow(cx0,cy0,ct0,0) : bflow(cx0,cy0,ct0,0)) : 0.f);
 				float cy_f = cy0 + (use_flow ? (dir > 0 ? fflow(cx0,cy0,ct0,1) : bflow(cx0,cy0,ct0,1)) : 0.f);
-				cx[dt] = std::max(0., std::min((double)sz.width  - 1, round(cx_f)));
-				cy[dt] = std::max(0., std::min((double)sz.height - 1, round(cy_f)));
+				cx[dt] = std::max(0., std::min((double)sz.width  - 1, (double)round(cx_f)));
+				cy[dt] = std::max(0., std::min((double)sz.height - 1, (double)round(cy_f)));
 				ct[dt] = qt;
 			}
 			else
@@ -1774,8 +1774,8 @@ unsigned estimateSimilarPatchesStep2(
 //					printf("sz = %d,%d,%d ~ c = %d,%d,%d\n",bflow.sz.width, bflow.sz.height, bflow.sz.frames, cx0, cy0, ct0);
 				float cx_f = cx0 + (use_flow ? (dir > 0 ? fflow(cx0,cy0,ct0,0) : bflow(cx0,cy0,ct0,0)) : 0.f);
 				float cy_f = cy0 + (use_flow ? (dir > 0 ? fflow(cx0,cy0,ct0,1) : bflow(cx0,cy0,ct0,1)) : 0.f);
-				cx[dt] = std::max(0., std::min((double)sz.width  - 1, round(cx_f)));
-				cy[dt] = std::max(0., std::min((double)sz.height - 1, round(cy_f)));
+				cx[dt] = std::max(0., std::min((double)sz.width  - 1, (double)round(cx_f)));
+				cy[dt] = std::max(0., std::min((double)sz.height - 1, (double)round(cy_f)));
 				ct[dt] = qt;
 			}
 			else
