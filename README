@@ -19,6 +19,7 @@ After some testing with the videos, we converged to the following pipeline:
 	- NL-Bayes with fixed basis
 	- Recursive NL-Bayes
 
+5/ Video deblurring (Jérémy)
 
 
 DATASET
@@ -53,6 +54,7 @@ Some minimal rules:
 			- 20_stabilize_video.sh       # main script for step 2, etc
 			- 30_compute_optical_flow.sh
 			- 40_run_denoising.sh
+			- 50_run_deblurring.sh
 
 	  help scripts can be called from the step scripts:
 			- 11_remove_impulse_noise.sh
@@ -89,6 +91,7 @@ lhp
 ├── 20_stabilize_video.sh       # main script for step 2, etc
 ├── 30_compute_optical_flow.sh
 ├── 40_run_denoising.sh
+├── 50_run_deblurring.sh
 └── README                      # this file
 
 
