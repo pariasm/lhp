@@ -22,7 +22,9 @@ then
 	L=$((F + N - 1))
 fi
 
-./51_run_fba_on_stabilized.sh $SEQUENCE $F $L
+# ./51_run_fba_on_stabilized.sh $SEQUENCE $F $L
 
 # ./51_run_fba_on_denoised.sh $SEQUENCE $F $L
+
+./51_run_fba_on_stabilized_then_denoise.sh $SEQUENCE $F $L
 
