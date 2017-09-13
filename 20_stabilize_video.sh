@@ -47,7 +47,7 @@ $STABI $INPUT_DIR/%03d.$EXT $F $L -1 -1 -1 -o $OUTPUT_DIR/%03d.tif
 # downsample the sequence
 echo "  Downsampling stabilized sequence $SEQUENCE."
 DOWNSA="src/utils/imscript/bin/downsa"
-ZF=4
+ZF=2
 for i in $(seq -f "%03g" $F $L)
 do
 	$DOWNSA v $ZF $OUTPUT_DIR/$i.tif $OUTPUT_DIR/$i.tif

@@ -44,7 +44,7 @@ fi
 PONO=src/1_preprocessing/ponomarenko/ponomarenko
 CONVICON=src/utils/convicon/bin/convicon
 DOWNSA="src/utils/imscript/bin/downsa"
-ZF=4
+ZF=2
 
 # step (only run ponomarenko in 1/S of the frames)
 S=10

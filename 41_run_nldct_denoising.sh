@@ -35,7 +35,7 @@ SIGMA=$(cat "$INPUT_DIR/sigma.txt")
 $DENO \
 -i ${INPUT_DIR}/%03d.tif -f $F -l $L -sigma $SIGMA -has-noise \
 -fof ${OFLOW_DIR}/%03d.f.flo -bof ${OFLOW_DIR}/%03d.b.flo \
--px2 0 -px1 16 -pt1 3 -wx1 54 -wt1 6 -np1 240 -b1 2.0 \
+-px2 0 -px1 16 -pt1 3 -wx1 31 -wt1 6 -np1 240 -b1 1.0 \
 -bsic ${OUTPUT_DIR}/b_%03d.tif
 
 mv measures.txt ${OUTPUT_DIR}/measures_basic
@@ -45,7 +45,7 @@ $DENO \
 -i ${INPUT_DIR}/%03d.tif -f $F -l $L -sigma $SIGMA -has-noise \
 -b ${OUTPUT_DIR}/b_%03d.tif \
 -fof ${OFLOW_DIR}/%03d.f.flo -bof ${OFLOW_DIR}/%03d.b.flo \
--px1 0 -px2 16 -pt2 3 -wx2 54 -wt2 6 -np2 120 \
+-px1 0 -px2 16 -pt2 3 -wx2 31 -wt2 6 -np2 120 \
 -deno ${OUTPUT_DIR}/d_%03d.tif
 
 # clean
