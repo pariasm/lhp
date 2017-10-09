@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     }
 
     int arg = 1;
-    int M = atoi(argv[arg++]);
+    int M = atoi(argv[arg++]) + 1;
     int W = atoi(argv[arg++]);
     int p = atof(argv[arg++]);
     int downsampling = atoi(argv[arg++]);
@@ -100,8 +100,8 @@ int main(int argc, char** argv)
 #pragma omp parallel
 #endif
         {
-            image_float_t* registered = (image_float_t*) malloc((2*M+1) * sizeof(image_float_t));
-            for (int m = 0; m < 2*M+1; m++)
+            image_float_t* registered = (image_float_t*) malloc(M * sizeof(image_float_t));
+            for (int m = 0; m < M; m++)
                 registered[m] = new_image_float(w, h, d);
 
 #ifdef _OPENMP
@@ -113,8 +113,8 @@ int main(int argc, char** argv)
                 clock_t clock2, clock3;
 
                 // compute the start and end of the temporal window
-                image_float_t* start = inputs + (i - M < 0 ? 0 : i - M);
-                image_float_t* end = inputs + (i + M >= n ? n - 1 : i + M);
+                image_float_t* start = inputs + (i - M + 1 < 0 ? 0 : i - M + 1);
+                image_float_t* end = inputs + (i >= n ? n - 1 : i);
                 int len = end - start + 1;
                 int ref = i - (start - inputs);
 
@@ -158,7 +158,7 @@ int main(int argc, char** argv)
                 }
             }
 
-            for (int m = 0; m < 2*M+1; m++)
+            for (int m = 0; m < M; m++)
                 free(registered[m].data);
         }
 
