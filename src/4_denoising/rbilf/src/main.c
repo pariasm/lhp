@@ -151,7 +151,7 @@ float * warp_bicubic(float * im, float * of, int w, int h, int ch)
 	return im_w;
 } */
 
-// video nl-means algorithm for frame t {{{1
+// recursuve nl-means algorithm {{{1
 
 // struct for storing the parameters of the algorithm
 struct vnlmeans_params
@@ -179,7 +179,8 @@ void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 
 // denoise frame t
 void vnlmeans_frame(float *deno1, float *nisy1, float *deno0, 
-		int w, int h, int ch, float sigma, const struct vnlmeans_params prms)
+		int w, int h, int ch, float sigma,
+		const struct vnlmeans_params prms, int frame)
 {
 	// definitions {{{2
 
@@ -226,49 +227,63 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 			D1[hy][hx][c] = 0;
 		}
 
-		// loop on search region {{{3
+		// spatial average: loop on search region {{{3
 		float cp = 0.;
-		const int wsz = prms.search_sz;
-		const int wx[2] = {max(px - wsz, 0), min(px + wsz - psz, w - psz + 1)};
-		const int wy[2] = {max(py - wsz, 0), min(py + wsz - psz, h - psz + 1)};
-		for (int qy = wy[0]; qy < wy[1]; ++qy)
-		for (int qx = wx[0]; qx < wx[1]; ++qx)
+		if (prms.weights_hx)
 		{
-			// compute patch distance {{{4
-			float w = 0;
-			const float l = prms.dista_lambda;
-			for (int hy = 0; hy < psz; ++hy)
-			for (int hx = 0; hx < psz; ++hx)
-				if (d0 && l != 1 && 
-						!isnan(d0[qy + hy][qx + hx][0]) && !isnan(D0[hy][hx][0]))
-					// use noisy and denoised patches from previous frame
-					for (int c  = 0; c  < ch ; ++c )
-					{
-						const float e1 = n1[qy + hy][qx + hx][c] - N1[hy][hx][c];
-						const float e0 = d0[qy + hy][qx + hx][c] - D0[hy][hx][c];
-						w += l * e1 * e1 + (1 - l) * e0 * e0;
-					}
-				else
-					// use only noisy from previous frame
-					for (int c  = 0; c  < ch ; ++c )
-					{
-						const float e1 = n1[qy + hy][qx + hx][c] - N1[hy][hx][c];
-						w += e1 * e1;
-					}
-
-			// compute similarity weight {{{4
-			w = expf(-1 / prms.weights_hx * w / (float)(psz*psz));
-//			w = (qx == px && qy == py) ? 1. : 0.;
-
-			// accumulate on output patch {{{4
-			if (w > prms.weights_thx)
+			const int wsz = prms.search_sz;
+			const int wx[2] = {max(px - wsz, 0), min(px + wsz - psz, w - psz + 1)};
+			const int wy[2] = {max(py - wsz, 0), min(py + wsz - psz, h - psz + 1)};
+			for (int qy = wy[0]; qy < wy[1]; ++qy)
+			for (int qx = wx[0]; qx < wx[1]; ++qx)
 			{
-				cp += w;
+				// compute patch distance {{{4
+				float w = 0;
+				const float l = prms.dista_lambda;
 				for (int hy = 0; hy < psz; ++hy)
 				for (int hx = 0; hx < psz; ++hx)
-				for (int c  = 0; c  < ch ; ++c )
-					D1[hy][hx][c] += n1[qy + hy][qx + hx][c] * w;
-			} // }}}4
+					if (d0 && l != 1 && 
+					    !isnan(d0[qy + hy][qx + hx][0]) && !isnan(D0[hy][hx][0]))
+						// use noisy and denoised patches from previous frame
+						for (int c  = 0; c  < ch ; ++c )
+						{
+							const float e1 = n1[qy + hy][qx + hx][c] - N1[hy][hx][c];
+							const float e0 = d0[qy + hy][qx + hx][c] - D0[hy][hx][c];
+							w += l * e1 * e1 + (1 - l) * e0 * e0;
+						}
+					else
+						// use only noisy from previous frame
+						for (int c  = 0; c  < ch ; ++c )
+						{
+							const float e1 = n1[qy + hy][qx + hx][c] - N1[hy][hx][c];
+							w += e1 * e1;
+						}
+	
+				// compute similarity weight }}}4{{{4
+				if (prms.weights_hx)
+					w = expf(-1 / prms.weights_hx * w / (float)(psz*psz));
+				else
+					w = (qx == px && qy == py) ? 1. : 0.;
+	
+				// accumulate on output patch }}}4{{{4
+				if (w > prms.weights_thx)
+				{
+					cp += w;
+					for (int hy = 0; hy < psz; ++hy)
+					for (int hx = 0; hx < psz; ++hx)
+					for (int c  = 0; c  < ch ; ++c )
+						D1[hy][hx][c] += n1[qy + hy][qx + hx][c] * w;
+				} // }}}4
+			}
+		}
+		else
+		{
+			// copy noisy patch to output {{{4
+			cp = 1.;
+			for (int hy = 0; hy < psz; ++hy)
+			for (int hx = 0; hx < psz; ++hx)
+			for (int c  = 0; c  < ch ; ++c )
+				D1[hy][hx][c] += n1[py + hy][px + hx][c];
 		}
 		
 		// normalize spatial average {{{3
@@ -295,7 +310,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 				}
 			}
 			// normalize and invert
-			iv = n*(float)ch / iv;
+			iv = n*(float)ch / iv * prms.weights_ht;
 
 			// temporal average
 			for (int hy = 0; hy < psz; ++hy)
