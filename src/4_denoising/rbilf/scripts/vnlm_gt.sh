@@ -58,8 +58,8 @@ echo "Frame PSNR " ${PP[*]} >> $OUT/measures
 
 RMSE=$(plambda -c "$SS sqrt")
 PSNR=$(plambda -c "255 $RMSE / log10 20 *")
-echo "RMSE $RMSE" >> $OUT/measures
-echo "PSNR $PSNR" >> $OUT/measures
+echo "Total RMSE $RMSE" >> $OUT/measures
+echo "Total PSNR $PSNR" >> $OUT/measures
 
 
 # vim:set foldmethod=marker:
