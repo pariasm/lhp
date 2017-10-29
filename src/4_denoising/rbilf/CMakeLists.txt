@@ -29,4 +29,5 @@ endif()
 
 add_subdirectory(lib/argparse) # command line parsing
 add_subdirectory(lib/iio)      # image i/o
+add_subdirectory(lib/tvl1flow) # tvl1 optical flow
 add_subdirectory(src)
