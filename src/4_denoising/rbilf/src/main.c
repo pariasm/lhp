@@ -6,7 +6,7 @@
 
 // some macros and data types {{{1
 
-#define DUMP_INFO
+//#define DUMP_INFO
 
 // comment for a simpler version without keeping track of pixel variances
 #define VARIANCES
@@ -177,6 +177,7 @@ struct vnlmeans_params
 	float weights_hx;    // spatial weights selectivity parameter
 	float weights_thx;   // spatial weights threshold
 	float weights_ht;    // temporal weights parameter
+	float weights_htv;   // transition variance weights parameter
 	float dista_lambda;  // weight of current frame in patch distance
 	bool pixelwise;      // toggle pixel-wise nlmeans
 };
@@ -188,8 +189,9 @@ void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 	if (p->patch_sz     < 0) p->patch_sz     = a ? 8 : 5;
 	if (p->search_sz    < 0) p->search_sz    = 10;
 	if (p->weights_hx   < 0) p->weights_hx   = 2. * sigma * sigma;
-	if (p->weights_thx  < 0) p->weights_thx  = .2f;
-	if (p->weights_ht   < 0) p->weights_ht   = 1.;
+	if (p->weights_thx  < 0) p->weights_thx  = .05f;
+	if (p->weights_ht   < 0) p->weights_ht   = 2 * sigma * sigma;
+	if (p->weights_htv  < 0) p->weights_htv  = 0;
 	if (p->dista_lambda < 0) p->dista_lambda = 1.;
 }
 
@@ -380,8 +382,8 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 			vt /= (float)(n*ch);
 
 			// compute similarity weight
-			if (prms.weights_ht && n)
-				ct = expf(-1 / prms.weights_ht * vt );
+			if (prms.weights_htv && n)
+				ct = expf(-1 / prms.weights_htv * vt );
 			else
 				ct = 0;
 		}
@@ -406,7 +408,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 				v1[py + hy][px + hx] += w * w * V1[hy][hx];
 
 	#ifdef AGGREGATE_TRANSITION_VAR
-				if (prms.weights_ht)
+				if (prms.weights_htv)
 				{
 					a01[py + hy][px + hx] += ct;
 					v01[py + hy][px + hx] += ct * vt;
@@ -477,7 +479,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 			// add transition variance to v0
 //			const float v0xy = v0[y][x] + v01[y][x] / (a01 ? a01[y][x] : 1.);
 			const float v01xy = v01[y][x] / (a01 ? a01[y][x] : 1.);
-			const float w01xy = min(1, max(0, exp( - 1./prms.weights_hx * v01xy )));
+			const float w01xy = min(1, max(0, exp( - 1./prms.weights_ht * v01xy )));
 
 			// compute coefficient in convex combination
 			const float v0xy = max(v0[y][x], 1e-2);
@@ -803,6 +805,7 @@ int main(int argc, const char *argv[])
 	prms.weights_hx   = -1.; // -1 means automatic value
 	prms.weights_thx  = -1.;
 	prms.weights_ht   = -1.;
+	prms.weights_htv  = -1.;
 	prms.dista_lambda = -1.;
 	prms.pixelwise = false;
 
@@ -820,7 +823,8 @@ int main(int argc, const char *argv[])
 		OPT_INTEGER('w', "search", &prms.search_sz, "search region radius"),
 		OPT_FLOAT  ( 0 , "whx"   , &prms.weights_hx, "spatial weights selectivity"),
 		OPT_FLOAT  ( 0 , "wthx"  , &prms.weights_thx, "spatial weights threshold"),
-		OPT_FLOAT  ( 0 , "wht"   , &prms.weights_ht, "temporal weights parameter"),
+		OPT_FLOAT  ( 0 , "wht"   , &prms.weights_ht, "temporal weights selectivity"),
+		OPT_FLOAT  ( 0 , "whtv"  , &prms.weights_htv, "transition variance weights selectivity"),
 		OPT_FLOAT  ( 0 , "lambda", &prms.dista_lambda, "current frame weight in patch distance"),
 		OPT_BOOLEAN( 0 , "pixel" , &prms.pixelwise, "toggle pixel-wise denoising"),
 		OPT_GROUP("Program options"),
@@ -848,6 +852,7 @@ int main(int argc, const char *argv[])
 		printf("\tw_hx   %g\n", prms.weights_hx);
 		printf("\tw_thx  %g\n", prms.weights_thx);
 		printf("\tw_ht   %g\n", prms.weights_ht);
+		printf("\tw_htv  %g\n", prms.weights_htv);
 		printf("\tlambda %g\n\n", prms.dista_lambda);
 #ifdef VARIANCES
 		printf("\tVARIANCES ON\n");
