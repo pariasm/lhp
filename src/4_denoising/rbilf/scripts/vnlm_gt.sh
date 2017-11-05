@@ -10,6 +10,16 @@ PRM=$6 # denoiser parameters
 
 mkdir -p $OUT/s$SIG
 OUT=$OUT/s$SIG
+
+for i in $(seq $FFR $LFR);
+do
+	file=$(printf $SEQ $i)
+	if [ ! -f $file ]
+	then
+		echo ERROR: $file not found
+		exit 1
+	fi
+done
  
 # add noise {{{1
 for i in $(seq $FFR $LFR);
