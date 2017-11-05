@@ -34,7 +34,7 @@ do
 done
 
 # compute optical flow {{{1
-TVL1="/home/pariasm/Work/optical_flow/algos/tvl1flow_3/tvl1flow"
+TVL1="../build/bin/tvl1flow"
 for i in $(seq $((FFR+1)) $LFR);
 do
 	file=$(printf $OUT"/%03d_b.flo" $i)

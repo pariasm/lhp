@@ -43,9 +43,10 @@ add_library(tvl1flow STATIC tvl1flow_lib.c)
 target_link_libraries(tvl1flow iio m)
 
 # tvl1 executable
-# add_executable(tvl1flow-bin main.c)
-# target_link_libraries(tvl1flow-bin iio m)
-# set_target_properties(tvl1flow-bin PROPERTIES OUTPUT_NAME tvl1flow)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+add_executable(tvl1flow-bin main.c)
+target_link_libraries(tvl1flow-bin iio m)
+set_target_properties(tvl1flow-bin PROPERTIES OUTPUT_NAME tvl1flow)
 
 ###############################################################################
 
