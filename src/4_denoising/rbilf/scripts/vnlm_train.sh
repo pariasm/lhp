@@ -28,7 +28,7 @@ FLOW="$SEQ/s${SIG}/tvl1_%03d_b.flo"
 for i in $(seq $FFR $LFR);
 do
 	# we remove a band of 10 pixels from each side of the frame
-	MM[$i]=$(psnr.sh $(printf $SEQ $i) $(printf $OUT/"deno_%03d.tif" $i) m 10)
+	MM[$i]=$(psnr.sh $(printf $ORIG $i) $(printf $OUT/"deno_%03d.tif" $i) m 10)
 	MM[$i]=$(plambda -c "${MM[$i]} sqrt")
 	PP[$i]=$(plambda -c "255 ${MM[$i]} / log10 20 *")
 done
