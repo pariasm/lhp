@@ -279,8 +279,8 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 		if (prms.weights_hx)
 		{
 			const int wsz = prms.search_sz;
-			const int wx[2] = {max(px - wsz, 0), min(px + wsz - psz, w - psz + 1)};
-			const int wy[2] = {max(py - wsz, 0), min(py + wsz - psz, h - psz + 1)};
+			const int wx[2] = {max(px - wsz, 0), min(px + wsz, w - psz) + 1};
+			const int wy[2] = {max(py - wsz, 0), min(py + wsz, h - psz) + 1};
 			for (int qy = wy[0]; qy < wy[1]; ++qy)
 			for (int qx = wx[0]; qx < wx[1]; ++qx)
 			{
@@ -623,8 +623,8 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 		if (prms.weights_hx)
 		{
 			const int wsz = prms.search_sz;
-			const int wx[2] = {max(px - wsz, 0), min(px + wsz - psz, w - psz + 1)};
-			const int wy[2] = {max(py - wsz, 0), min(py + wsz - psz, h - psz + 1)};
+			const int wx[2] = {max(px - wsz, 0), min(px + wsz, w - psz) + 1};
+			const int wy[2] = {max(py - wsz, 0), min(py + wsz, h - psz) + 1};
 			for (int qy = wy[0]; qy < wy[1]; ++qy)
 			for (int qx = wx[0]; qx < wx[1]; ++qx)
 			{
