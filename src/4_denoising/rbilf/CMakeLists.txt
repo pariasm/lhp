@@ -30,3 +30,22 @@ add_subdirectory(lib/iio)      # image i/o
 add_subdirectory(lib/tvl1flow) # tvl1 optical flow
 add_subdirectory(lib/argparse) # command line parsing
 add_subdirectory(src)
+
+# configure cpack #############################################################
+
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+
+set(CPACK_SOURCE_GENERATOR "TGZ")
+set(CPACK_SOURCE_IGNORE_FILES
+"\\\\.*\\\\.swp"
+"\\\\*\\\\.o"
+"^${PROJECT_SOURCE_DIR}/build/"
+"git")
+
+set(CPACK_SOURCE_PACKAGE_FILE_NAME
+	"${PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}-src")
+
+include(CPack)
+# make package <-- TODO : configure properly
+# make package_source
