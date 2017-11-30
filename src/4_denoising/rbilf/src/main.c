@@ -9,7 +9,7 @@
 //#define DUMP_INFO
 
 // comment for a simpler version without keeping track of pixel variances
-//#define VARIANCES
+#define VARIANCES
 
 // comment for uniform aggregation
 #define WEIGHTED_AGGREGATION
@@ -192,7 +192,7 @@ void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 	if (p->weights_ht   < 0) p->weights_ht   = 1.4 * sigma;
 	if (p->weights_htv  < 0) p->weights_htv  = 2.0 * sigma;
 	if (p->dista_lambda < 0) p->dista_lambda = 1.;
-	if (p->tv_lambda    < 0) p->tv_lambda    = 1.;
+	if (p->tv_lambda    < 0) p->tv_lambda    = 0.;
 }
 
 // denoise frame t

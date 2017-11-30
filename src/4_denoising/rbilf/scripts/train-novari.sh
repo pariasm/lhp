@@ -69,8 +69,8 @@ do
 	then
 		for seq in ${seqs[@]}
 		do
-			echo "./vnlm_train.sh ${sf}${seq} 1 $nf $s $trialfolder \"$params\""
-			./vnlm_train.sh ${sf}${seq} 1 $nf $s $trialfolder "$params"
+			echo "./vnlm_train-novari.sh ${sf}${seq} 1 $nf $s $trialfolder \"$params\""
+			./vnlm_train-novari.sh ${sf}${seq} 1 $nf $s $trialfolder "$params"
 			psnr=$(./vnlm_train.sh ${sf}${seq} 1 $nf $s $trialfolder "$params")
 			mpsnr=$(echo "$mpsnr + $psnr/$nseqs" | bc -l)
 			#echo $mpsnr
