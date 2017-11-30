@@ -1,6 +1,9 @@
 #!/bin/bash
 # Tune the algorithm's parameters
 
+# command to launch in parallel
+# $ for m in vari novari; do for i in {00..13}; do echo "./train-$m.sh $m$i 2>/dev/null"; done; done | parallel
+
 # noise levels
 sigmas=(10 20 40 30)
 
