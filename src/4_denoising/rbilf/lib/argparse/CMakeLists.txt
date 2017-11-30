@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0048 NEW) # avoid annoing warnings
+project(argparse LANGUAGES C)
 
-project(argparse C)
-
-message(STATUS "Configuring project: " ${CMAKE_PROJECT_NAME})
+message(STATUS "Configuring project: " ${PROJECT_NAME})
 
 ###############################################################################
 
