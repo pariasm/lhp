@@ -15,14 +15,21 @@ wszs=(5 10 15)
 ntrials=2000
 
 # test sequences
+# seqs=(\
+# derf/bus_mono \
+# derf/foreman_mono \
+# derf/football_mono \
+# derf/tennis_mono \
+# derf/stefan_mono \
+# )
+# #tut/gsalesman \
 seqs=(\
-derf/bus_mono \
-derf/foreman_mono \
-derf/football_mono \
-derf/tennis_mono \
-derf/stefan_mono \
+derf-hd/park_joy \
+derf-hd/speed_bag \
+derf-hd/station2 \
+derf-hd/sunflower \
+derf-hd/tractor \
 )
-#tut/gsalesman \
 
 # seq folder
 sf='/home/pariasm/denoising/data/'
@@ -68,14 +75,14 @@ do
 
 	mpsnr=0
 	nseqs=${#seqs[@]}
-	nf=15
+	f0=70
+	f1=85
 	if [ ! -d $trialfolder ]
 	then
 		for seq in ${seqs[@]}
 		do
-			echo "./vnlm_train.sh ${sf}${seq} 1 $nf $s $trialfolder \"$params\""
-			./vnlm_train.sh ${sf}${seq} 1 $nf $s $trialfolder "$params"
-			psnr=$(./vnlm_train.sh ${sf}${seq} 1 $nf $s $trialfolder "$params")
+			echo "./vnlm_train.sh ${sf}${seq} $f0 $f1 $s $trialfolder \"$params\""
+			psnr=$(./vnlm_train.sh ${sf}${seq} $f0 $f1 $s $trialfolder "$params")
 			mpsnr=$(echo "$mpsnr + $psnr/$nseqs" | bc -l)
 			#echo $mpsnr
 		done
