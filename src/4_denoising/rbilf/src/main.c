@@ -32,6 +32,8 @@
 	   __typeof__ (b) _b = (b); \
 	   _a < _b ? _a : _b; })
 
+#define FLT_HUGE 1e10
+
 // read/write image sequence [[[1
 static
 float * vio_read_video_float_vec(const char * const path, int first, int last, 
@@ -174,9 +176,10 @@ struct vnlmeans_params
 {
 	int patch_sz;        // patch size
 	int search_sz;       // search window radius
-	float weights_hx;    // spatial weights selectivity parameter
+	float weights_hx;    // spatial patch similarity weights parameter
+	float weights_hd;    // spatial distance weights parameter (for bilateral)
 	float weights_thx;   // spatial weights threshold
-	float weights_ht;    // temporal weights parameter
+	float weights_ht;    // temporal patch similarity weights parameter
 	float weights_htv;   // transition variance weights parameter
 	float dista_lambda;  // weight of current frame in patch distance
 	float tv_lambda;     // weight of current frame in patch distance
@@ -190,6 +193,7 @@ void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 	if (p->patch_sz     < 0) p->patch_sz     = a ? 8 : 5;
 	if (p->search_sz    < 0) p->search_sz    = 10;
 	if (p->weights_hx   < 0) p->weights_hx   = 0.85 * sigma;
+	if (p->weights_hd   < 0) p->weights_hd   = FLT_HUGE;
 	if (p->weights_thx  < 0) p->weights_thx  = .05f;
 	if (p->weights_ht   < 0) p->weights_ht   = 1.4 * sigma;
 	if (p->weights_htv  < 0) p->weights_htv  = 2.0 * sigma;
@@ -198,7 +202,7 @@ void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 }
 
 // recursive nl-means for frame t (pixel temporal average) [[[1
-void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0, 
+void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 #ifdef VARIANCES
 		float *vari1, float *vari0,
 #endif
@@ -208,8 +212,9 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 	// definitions [[[2
 
 	const int psz = prms.patch_sz;
-	const int step = prms.pixelwise ? 1 : psz/2;
+	const int step = prms.pixelwise ? 1 : max(1, psz/2);
 	const float weights_hx2  = prms.weights_hx * prms.weights_hx;
+	const float weights_hd2  = prms.weights_hd * prms.weights_hd * 2;
 	const float weights_ht2  = prms.weights_ht * prms.weights_ht;
 	const float weights_htv2 = prms.weights_htv * prms.weights_htv;
 	const float sigma2 = sigma * sigma;
@@ -320,7 +325,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 //							ww += max(eN1 * eN1 - 2*sigma2, 0.);
 							ww += eN1 * eN1;
 						}
-	
+
 				// compute spatial similarity weight ]]]4[[[4
 				if (weights_hx2)
 					ww = expf(-1 / weights_hx2 * ww / (float)(psz*psz*ch));
@@ -328,6 +333,17 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 //					ww = 1.;
 				else
 					ww = (qx == px && qy == py) ? 1. : 0.;
+
+				if (weights_hd2 < FLT_HUGE)
+				{
+					if (weights_hd2)
+					{
+						const float dx = (px - qx), dy = (py - qy);
+						ww *= expf(-1 / weights_hd2 * (dx * dx + dy * dy) );
+					}
+					else
+						ww = (qx == px && qy == py) ? 1. : 0.;
+				}
 
 #ifdef TRIM_SELF_WEIGHT
 				maxw = max(ww, maxw);
@@ -361,7 +377,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 			for (int c  = 0; c  < ch ; ++c )
 				D1[hy][hx][c] = n1[py + hy][px + hx][c];
 		}
-		
+
 		// normalize spatial average [[[3
 		float icp = 1. / max(cp, 1e-6);
 		for (int hy = 0; hy < psz; ++hy)
@@ -394,7 +410,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 					{
 						/* NOTE: the computation of the error between d0 and the spatially
 						 * denoised d1 could (and should?) be done after spatial aggregation.
-						 * That requires a local loop with a patch kernel to compute all 
+						 * That requires a local loop with a patch kernel to compute all
 						 * patch transition errors. A simpler alternative is to just compute
 						 * the pixel-wise error between d0 and the aggregated d1. */
 						const float eD = D1[hy][hx][c] - D0[hy][hx][c];
@@ -509,7 +525,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 #else
 			// estimate transition variance as (d0 - d1)^2
 			float v01xy = 0.;
-			for (int c = 0; c < ch; ++c) 
+			for (int c = 0; c < ch; ++c)
 			{
 				const float e = d0[y][x][c] - d1[y][x][c];
 				v01xy += e * e / (float)ch;
@@ -581,7 +597,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 }
 
 // recursive nl-means for frame t (patch temporal average) [[[1
-void vnlmeans_frame(float *deno1, float *nisy1, float *deno0, 
+void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 #ifdef VARIANCES
 		float *vari1, float *vari0,
 #endif
@@ -705,7 +721,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 			for (int c  = 0; c  < ch ; ++c )
 				D1[hy][hx][c] = n1[py + hy][px + hx][c];
 		}
-		
+
 		// normalize spatial average [[[3
 		float icp = 1. / max(cp, 1e-6);
 		for (int hy = 0; hy < psz; ++hy)
@@ -848,10 +864,11 @@ int main(int argc, const char *argv[])
 		OPT_FLOAT  ('s', "sigma" , &sigma, "noise standard dev"),
 		OPT_INTEGER('p', "patch" , &prms.patch_sz, "patch size"),
 		OPT_INTEGER('w', "search", &prms.search_sz, "search region radius"),
-		OPT_FLOAT  ( 0 , "whx"   , &prms.weights_hx, "spatial weights selectivity"),
+		OPT_FLOAT  ( 0 , "whx"   , &prms.weights_hx, "spatial patch sim. weights param"),
+		OPT_FLOAT  ( 0 , "whd"   , &prms.weights_hd, "spatial distance weights param"),
 		OPT_FLOAT  ( 0 , "wthx"  , &prms.weights_thx, "spatial weights threshold"),
-		OPT_FLOAT  ( 0 , "wht"   , &prms.weights_ht, "temporal weights selectivity"),
-		OPT_FLOAT  ( 0 , "whtv"  , &prms.weights_htv, "transition variance weights selectivity"),
+		OPT_FLOAT  ( 0 , "wht"   , &prms.weights_ht, "temporal patch sim. weights param"),
+		OPT_FLOAT  ( 0 , "whtv"  , &prms.weights_htv, "transition variance weights param"),
 		OPT_FLOAT  ( 0 , "lambda", &prms.dista_lambda, "noisy patch weight in patch distance"),
 		OPT_FLOAT  ( 0 , "lambtv", &prms.tv_lambda, "noisy patch weight in transition variance"),
 		OPT_BOOLEAN( 0 , "pixel" , &prms.pixelwise, "toggle pixel-wise denoising"),
@@ -878,6 +895,7 @@ int main(int argc, const char *argv[])
 		printf("\tpatch     %d\n", prms.patch_sz);
 		printf("\tsearch    %d\n", prms.search_sz);
 		printf("\tw_hx      %g\n", prms.weights_hx);
+		printf("\tw_hd      %g\n", prms.weights_hd);
 		printf("\tw_thx     %g\n", prms.weights_thx);
 		printf("\tw_ht      %g\n", prms.weights_ht);
 		printf("\tw_htv     %g\n", prms.weights_htv);
