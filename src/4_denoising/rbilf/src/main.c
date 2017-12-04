@@ -4,14 +4,14 @@
 #include <assert.h>     // assert
 #include <stdlib.h>     // NULL, EXIT_SUCCESS/FAILURE
 #include <stdio.h>      // printf, fprintf, stderr
-#include <math.h>       // exp, nans (used as boundary value by bicubic interp)
+#include <math.h>       // expf, nans (used as boundary value by bicubic interp)
 
-// some macros and data types {{{1
+// some macros and data types [[[1
 
 //#define DUMP_INFO
 
 // comment for a simpler version without keeping track of pixel variances
-#define VARIANCES
+//#define VARIANCES
 
 // comment for uniform aggregation
 #define WEIGHTED_AGGREGATION
@@ -32,7 +32,7 @@
 	   __typeof__ (b) _b = (b); \
 	   _a < _b ? _a : _b; })
 
-// read/write image sequence {{{1
+// read/write image sequence [[[1
 static
 float * vio_read_video_float_vec(const char * const path, int first, int last, 
 		int *w, int *h, int *pd)
@@ -94,7 +94,7 @@ void vio_save_video_float_vec(const char * const path, float * vid,
 }
 
 
-// bicubic interpolation {{{1
+// bicubic interpolation [[[1
 
 #ifdef NAN
 // extrapolate by nan
@@ -167,7 +167,7 @@ float * warp_bicubic(float * im, float * of, int w, int h, int ch)
 	return im_w;
 } */
 
-// recursive nl-means algorithm {{{1
+// recursive nl-means parameters [[[1
 
 // struct for storing the parameters of the algorithm
 struct vnlmeans_params
@@ -197,7 +197,7 @@ void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 	if (p->tv_lambda    < 0) p->tv_lambda    = 0.;
 }
 
-// denoise frame t
+// recursive nl-means for frame t (pixel temporal average) [[[1
 void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0, 
 #ifdef VARIANCES
 		float *vari1, float *vari0,
@@ -205,7 +205,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 		int w, int h, int ch, float sigma,
 		const struct vnlmeans_params prms, int frame)
 {
-	// definitions {{{2
+	// definitions [[[2
 
 	const int psz = prms.patch_sz;
 	const int step = prms.pixelwise ? 1 : psz/2;
@@ -264,11 +264,14 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 	float (*v01)[w] = (void *)var01;
 #endif
 
-	// loop on image patches {{{2
+	// spatial denoising for frame t [[[2
 	for (int py = 0; py < h - psz + 1; py += step) // FIXME: boundary pixels
 	for (int px = 0; px < w - psz + 1; px += step) // may not be denoised
 	{
-		//	load target patch {{{3
+		/* print state of iteration
+		if ((py * w * step) % 10*step == 0) printf("%4d\b\b\b\b", py, px);*/
+
+		//	load target patch [[[3
 		for (int hy = 0; hy < psz; ++hy)
 		for (int hx = 0; hx < psz; ++hx)
 		for (int c  = 0; c  < ch ; ++c )
@@ -278,7 +281,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 			D1[hy][hx][c] = 0;
 		}
 
-		// spatial average: loop on search region {{{3
+		// spatial average: loop on search region [[[3
 		float cp = 0.; // sum of similarity weights, used for normalization
 		if (weights_hx2)
 		{
@@ -294,7 +297,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 			if (qx != px && qy != py)
 #endif
 			{
-				// compute patch distance {{{4
+				// compute patch distance [[[4
 				float ww = 0;
 				const float l = prms.dista_lambda;
 				for (int hy = 0; hy < psz; ++hy)
@@ -318,7 +321,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 							ww += eN1 * eN1;
 						}
 	
-				// compute similarity weight }}}4{{{4
+				// compute spatial similarity weight ]]]4[[[4
 				if (weights_hx2)
 					ww = expf(-1 / weights_hx2 * ww / (float)(psz*psz));
 //					ww = (ww / (float)(psz*psz*ch)) < weights_hx2;
@@ -329,7 +332,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 #ifdef TRIM_SELF_WEIGHT
 				maxw = max(ww, maxw);
 #endif
-				// accumulate on output patch }}}4{{{4
+				// accumulate on output patch ]]]4[[[4
 				if (ww > prms.weights_thx)
 				{
 					cp += ww;
@@ -337,7 +340,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 					for (int hx = 0; hx < psz; ++hx)
 					for (int c  = 0; c  < ch ; ++c )
 						D1[hy][hx][c] += n1[qy + hy][qx + hx][c] * ww;
-				}// }}}4
+				}// ]]]4
 			}
 #ifdef TRIM_SELF_WEIGHT
 			// accumulate the central patch using maxw
@@ -359,7 +362,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 				D1[hy][hx][c] = n1[py + hy][px + hx][c];
 		}
 		
-		// normalize spatial average {{{3
+		// normalize spatial average [[[3
 		float icp = 1. / max(cp, 1e-6);
 		for (int hy = 0; hy < psz; ++hy)
 		for (int hx = 0; hx < psz; ++hx)
@@ -375,7 +378,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 			V1[hy][hx] = vp;
 #endif
 
-		// compute transition variance {{{3
+		// compute transition variance [[[3
 #ifdef AGGREGATE_TRANSITION_VAR
 		float tvp = 0.; // transition variance of patch p
 		float twp = 0.; // associated similarity weight
@@ -412,7 +415,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 		}
 #endif
 
-		// aggregate denoised patch on output image {{{3
+		// aggregate denoised patch on spatial output image [[[3
 		if (a1)
 			// patch-wise denoising: aggregate the whole denoised patch
 			for (int hy = 0; hy < psz; ++hy)
@@ -464,10 +467,10 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 			v1[py + psz/2][px + psz/2] = vp * vp;
 #endif
 		}
-		// }}}3
+		// ]]]3
 	}
 
-	// normalize spatial output {{{2
+	// normalize spatial output image [[[3
 	if (aggr1)
 	for (int i = 0, j = 0; i < w*h; ++i) 
 	for (int c = 0; c < ch ; ++c, ++j) 
@@ -493,7 +496,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 	}
 #endif
 
-	// temporal average with previous denoised image {{{2
+	// temporal average with frame t-1 [[[2
 	if (d0)
 	{
 		for (int y = 0; y < h; ++y)
@@ -513,7 +516,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 			}
 #endif
 			// compute variance multiplier
-			const float w01xy = min(1, max(0, exp( - 1./weights_ht2 * v01xy )));
+			const float w01xy = min(1, max(0, expf( - 1./weights_ht2 * v01xy )));
 
 #ifdef VARIANCES 
 			// compute coefficient in convex combination
@@ -547,6 +550,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 		}
 	}
 
+	// clean-up [[[2
 #ifdef DUMP_INFO
 	if (d0)
 	{
@@ -573,10 +577,10 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 	if (var01) free(var01);
 	if (agg01) free(agg01);
 #endif
-	return; // }}}2
+	return; // ]]]2
 }
 
-// denoise frame t
+// recursive nl-means for frame t (patch temporal average) [[[1
 void vnlmeans_frame(float *deno1, float *nisy1, float *deno0, 
 #ifdef VARIANCES
 		float *vari1, float *vari0,
@@ -584,7 +588,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 		int w, int h, int ch, float sigma,
 		const struct vnlmeans_params prms)
 {
-	// definitions {{{2
+	// definitions [[[2
 
 	const int psz = prms.patch_sz;
 	const int step = prms.pixelwise ? 1 : psz/2;
@@ -621,7 +625,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 	float (*v1)[w]     = (void *)vari1;       // aggregation weights at t
 #endif
 
-	// loop on image patches {{{2
+	// loop on image patches [[[2
 #if 0
 	for (int oy = 0; oy < psz; oy += step) // split in grids of non-overlapping
 	for (int ox = 0; ox < psz; ox += step) // patches (for parallelization)
@@ -633,7 +637,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 	for (int px = 0; px < w - psz + 1; px += step) // may not be denoised
 #endif
 	{
-		//	load target patch {{{3
+		//	load target patch [[[3
 		for (int hy = 0; hy < psz; ++hy)
 		for (int hx = 0; hx < psz; ++hx)
 		for (int c  = 0; c  < ch ; ++c )
@@ -643,7 +647,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 			D1[hy][hx][c] = 0;
 		}
 
-		// spatial average: loop on search region {{{3
+		// spatial average: loop on search region [[[3
 		float cp = 0.; // sum of all weights (for normalization)
 		if (weights_hx2)
 		{
@@ -653,7 +657,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 			for (int qy = wy[0]; qy < wy[1]; ++qy)
 			for (int qx = wx[0]; qx < wx[1]; ++qx)
 			{
-				// compute patch distance {{{4
+				// compute patch distance [[[4
 				float ww = 0; // patch distance is saved here
 				const float l = prms.dista_lambda;
 				for (int hy = 0; hy < psz; ++hy)
@@ -675,13 +679,13 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 							ww += e1 * e1;
 						}
 	
-				// compute similarity weight }}}4{{{4
+				// compute similarity weight ]]]4[[[4
 				if (weights_hx2)
 					ww = expf(-1 / weights_hx2 * ww / (float)(psz*psz));
 				else
 					ww = (qx == px && qy == py) ? 1. : 0.;
 	
-				// accumulate on output patch }}}4{{{4
+				// accumulate on output patch ]]]4[[[4
 				if (ww > prms.weights_thx)
 				{
 					cp += ww;
@@ -689,7 +693,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 					for (int hx = 0; hx < psz; ++hx)
 					for (int c  = 0; c  < ch ; ++c )
 						D1[hy][hx][c] += n1[qy + hy][qx + hx][c] * ww;
-				}// }}}4
+				}// ]]]4
 			}
 		}
 		else
@@ -702,7 +706,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 				D1[hy][hx][c] = n1[py + hy][px + hx][c];
 		}
 		
-		// normalize spatial average {{{3
+		// normalize spatial average [[[3
 		float icp = 1. / max(cp, 1e-6);
 		for (int hy = 0; hy < psz; ++hy)
 		for (int hx = 0; hx < psz; ++hx)
@@ -718,7 +722,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 			V1[hy][hx] = vp;
 #endif
 
-		// temporal average with denoised patch at t-1 {{{3
+		// temporal average with denoised patch at t-1 [[[3
 		if (d0)
 		{
 			// estimate transition error
@@ -748,7 +752,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 			}
 		}
 
-		// aggregate denoised patch on output image {{{3
+		// aggregate denoised patch on output image [[[3
 		if (a1)
 			// patch-wise denoising: aggregate the whole denoised patch
 			for (int hy = 0; hy < psz; ++hy)
@@ -781,10 +785,10 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 				d1[py + psz/2][px + psz/2][c] += D1[psz/2][psz/2][c];
 		}
 
-		// }}}3
+		// ]]]3
 	}
 
-	// normalize output {{{2
+	// normalize output [[[2
 	if (aggr1)
 	for (int i = 0, j = 0; i < w*h; ++i) 
 	for (int c = 0; c < ch ; ++c, ++j) 
@@ -798,10 +802,10 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 
 	// free allocated mem and quit
 	if (aggr1) free(aggr1);
-	return; // }}}2
+	return; // ]]]2
 }
 
-// main funcion {{{1
+// main funcion [[[1
 
 // 'usage' message in the command line
 static const char *const usages[] = {
@@ -812,7 +816,7 @@ static const char *const usages[] = {
 
 int main(int argc, const char *argv[])
 {
-	// parse command line {{{2
+	// parse command line [[[2
 
 	// command line parameters and their defaults
 	const char *nisy_path = NULL;
@@ -891,7 +895,7 @@ int main(int argc, const char *argv[])
 #endif
 	}
 
-	// load data {{{2
+	// load data [[[2
 	if (verbose) printf("loading video %s\n", nisy_path);
 	int w, h, c; //, frames = lframe - fframe + 1;
 	float * nisy = vio_read_video_float_vec(nisy_path, fframe, lframe, &w, &h, &c);
@@ -923,7 +927,7 @@ int main(int argc, const char *argv[])
 		}
 	}
 
-	// run denoiser {{{2
+	// run denoiser [[[2
 	const int whc = w*h*c, wh2 = w*h*2;
 	float * deno = nisy;
 	float * warp0 = malloc(whc*sizeof(float));
@@ -979,7 +983,7 @@ int main(int argc, const char *argv[])
 		memcpy(nisy1, deno1, whc*sizeof(float));
 	}
 
-	// save output {{{2
+	// save output [[[2
 	vio_save_video_float_vec(deno_path, deno, fframe, lframe, w, h, c);
 
 	if (deno1) free(deno1);
@@ -991,7 +995,8 @@ int main(int argc, const char *argv[])
 	if (nisy) free(nisy);
 	if (flow) free(flow);
 
-	return EXIT_SUCCESS; // }}}2
+	return EXIT_SUCCESS; // ]]]2
 }
 
 // vim:set foldmethod=marker:
+// vim:set foldmarker=[[[,]]]:
