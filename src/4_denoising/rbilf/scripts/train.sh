@@ -12,7 +12,7 @@ pszs=(4 8 12)
 wszs=(5 10 15)
 
 # number of trials
-ntrials=1000
+ntrials=2000
 
 # test sequences
 seqs=(\
@@ -45,7 +45,7 @@ do
 #	r=$(awk -v M=2 -v s=$RANDOM 'BEGIN{srand(s); print int(rand()*(M+1))}')
 #	w=${wszs[$r]}
 
-	p=8
+	p=4
 	w=10
 
 	# spatial and temporal weights
@@ -55,13 +55,14 @@ do
 	whv=$(awk -v M=$W -v s=$RANDOM 'BEGIN{srand(s); print int(rand()*(M+1))}')
 #	whv=0
 
+	lambda=$(awk -v s=$RANDOM 'BEGIN{srand(s); print rand()}')
 	lambtv=$(awk -v s=$RANDOM 'BEGIN{srand(s); print rand()}')
 
-	trialfolder=$(printf "$output/rnlm.s%02d.p%02d.w%02d.whx%04d.wht%04d.whv%04d.lambtv%5.3f\n" \
-		$s $p $w $whx $wht $whv $lambtv)
+	trialfolder=$(printf "$output/rnlm.s%02d.p%02d.w%02d.whx%04d.wht%04d.whv%04d.lambtv%5.3f.lambda%5.3f\n" \
+		$s $p $w $whx $wht $whv $lambtv $lambda)
 
-	params=$(printf " -p %d -w %d --whx %d --wht %d --whtv %d --lambtv %f" \
-		$p $w $whx $wht $whv $lambtv)
+	params=$(printf " -p %d -w %d --whx %d --wht %d --whtv %d --lambtv %f --lambda %f" \
+		$p $w $whx $wht $whv $lambtv $lambda)
 
 	echo $trialfolder
 
@@ -80,8 +81,8 @@ do
 		done
 	fi
 	
-	printf "%2d %2d %2d %4d %4d %4d %5.3f %7.4f\n" \
-		$s $p $w $whx $wht $whv $lambtv $mpsnr >> $output/table
+	printf "%2d %2d %2d %4d %4d %4d %5.3f %5.3f %7.4f\n" \
+		$s $p $w $whx $wht $whv $lambtv $lambda $mpsnr >> $output/table
 
 	rm $trialfolder/*.tif
 
