@@ -323,7 +323,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 	
 				// compute spatial similarity weight ]]]4[[[4
 				if (weights_hx2)
-					ww = expf(-1 / weights_hx2 * ww / (float)(psz*psz));
+					ww = expf(-1 / weights_hx2 * ww / (float)(psz*psz*ch));
 //					ww = (ww / (float)(psz*psz*ch)) < weights_hx2;
 //					ww = 1.;
 				else
