@@ -11,6 +11,9 @@ PRM=$6 # denoiser parameters
 mkdir -p $OUT/s$SIG
 OUT=$OUT/s$SIG
 
+# we assume that the binaries are in the same folder as the script
+DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
 # error checking {{{1
 for i in $(seq $FFR $LFR);
 do
@@ -34,7 +37,7 @@ do
 done
 
 # compute optical flow {{{1
-TVL1="../build/bin/tvl1flow"
+TVL1="$DIR/tvl1flow"
 for i in $(seq $((FFR+1)) $LFR);
 do
 	file=$(printf $OUT"/%03d_b.flo" $i)
@@ -86,7 +89,7 @@ cp $(printf $OUT"/%03d_b.flo" $((FFR+1))) $(printf $OUT"/%03d_b.flo" $FFR)
 # done
 
 # run denoising {{{1
-../build/bin/vnlmeans \
+$DIR/vnlmeans \
  -i $OUT"/%03d.tif" -o $OUT"/%03d_b.flo" -f $FFR -l $LFR -s $SIG \
  -d $OUT"/deno_%03d.tif" $PRM
 
