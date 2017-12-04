@@ -1,8 +1,10 @@
 #include "argparse.h"   // command line parser
 #include "iio.h"        // image i/o
 
-#include <stdlib.h>
-#include <math.h>      // nans (used as boundary value by bicubic interp)
+#include <assert.h>     // assert
+#include <stdlib.h>     // NULL, EXIT_SUCCESS/FAILURE
+#include <stdio.h>      // printf, fprintf, stderr
+#include <math.h>       // exp, nans (used as boundary value by bicubic interp)
 
 // some macros and data types {{{1
 
