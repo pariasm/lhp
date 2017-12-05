@@ -39,8 +39,8 @@ set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_IGNORE_FILES
-"\\\\.*\\\\.swp"
-"\\\\*\\\\.o"
+"\\\\.*\\\\.swp$"
+".\\\\.o$"
 "^${PROJECT_SOURCE_DIR}/build/"
 "git")
 
