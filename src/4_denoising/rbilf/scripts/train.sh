@@ -12,17 +12,24 @@ pszs=(4 8 12)
 wszs=(5 10 15)
 
 # number of trials
-ntrials=1000
+ntrials=2000
 
 # test sequences
+# seqs=(\
+# derf/bus_mono \
+# derf/foreman_mono \
+# derf/football_mono \
+# derf/tennis_mono \
+# derf/stefan_mono \
+# )
+# #tut/gsalesman \
 seqs=(\
-derf/bus_mono \
-derf/foreman_mono \
-derf/football_mono \
-derf/tennis_mono \
-derf/stefan_mono \
+derf-hd/park_joy \
+derf-hd/speed_bag \
+derf-hd/station2 \
+derf-hd/sunflower \
+derf-hd/tractor \
 )
-#tut/gsalesman \
 
 # seq folder
 sf='/home/pariasm/denoising/data/'
@@ -45,7 +52,7 @@ do
 #	r=$(awk -v M=2 -v s=$RANDOM 'BEGIN{srand(s); print int(rand()*(M+1))}')
 #	w=${wszs[$r]}
 
-	p=8
+	p=4
 	w=10
 
 	# spatial and temporal weights
@@ -55,33 +62,34 @@ do
 	whv=$(awk -v M=$W -v s=$RANDOM 'BEGIN{srand(s); print int(rand()*(M+1))}')
 #	whv=0
 
+	lambda=$(awk -v s=$RANDOM 'BEGIN{srand(s); print rand()}')
 	lambtv=$(awk -v s=$RANDOM 'BEGIN{srand(s); print rand()}')
 
-	trialfolder=$(printf "$output/rnlm.s%02d.p%02d.w%02d.whx%04d.wht%04d.whv%04d.lambtv%5.3f\n" \
-		$s $p $w $whx $wht $whv $lambtv)
+	trialfolder=$(printf "$output/rnlm.s%02d.p%02d.w%02d.whx%04d.wht%04d.whv%04d.lambtv%5.3f.lambda%5.3f\n" \
+		$s $p $w $whx $wht $whv $lambtv $lambda)
 
-	params=$(printf " -p %d -w %d --whx %d --wht %d --whtv %d --lambtv %f" \
-		$p $w $whx $wht $whv $lambtv)
+	params=$(printf " -p %d -w %d --whx %d --wht %d --whtv %d --lambtv %f --lambda %f" \
+		$p $w $whx $wht $whv $lambtv $lambda)
 
 	echo $trialfolder
 
 	mpsnr=0
 	nseqs=${#seqs[@]}
-	nf=15
+	f0=70
+	f1=85
 	if [ ! -d $trialfolder ]
 	then
 		for seq in ${seqs[@]}
 		do
-			echo "./vnlm_train.sh ${sf}${seq} 1 $nf $s $trialfolder \"$params\""
-			./vnlm_train.sh ${sf}${seq} 1 $nf $s $trialfolder "$params"
-			psnr=$(./vnlm_train.sh ${sf}${seq} 1 $nf $s $trialfolder "$params")
+			echo "./vnlm_train.sh ${sf}${seq} $f0 $f1 $s $trialfolder \"$params\""
+			psnr=$(./vnlm_train.sh ${sf}${seq} $f0 $f1 $s $trialfolder "$params")
 			mpsnr=$(echo "$mpsnr + $psnr/$nseqs" | bc -l)
 			#echo $mpsnr
 		done
 	fi
 	
-	printf "%2d %2d %2d %4d %4d %4d %5.3f %7.4f\n" \
-		$s $p $w $whx $wht $whv $lambtv $mpsnr >> $output/table
+	printf "%2d %2d %2d %4d %4d %4d %5.3f %5.3f %7.4f\n" \
+		$s $p $w $whx $wht $whv $lambtv $lambda $mpsnr >> $output/table
 
 	rm $trialfolder/*.tif
 
