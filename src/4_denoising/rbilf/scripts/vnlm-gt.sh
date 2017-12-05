@@ -8,8 +8,9 @@ SIG=$4 # noise standard dev.
 OUT=$5 # output folder
 PRM=$6 # denoiser parameters
 
-mkdir -p $OUT/s$SIG
-OUT=$OUT/s$SIG
+#mkdir -p $OUT/s$SIG
+#OUT=$OUT/s$SIG
+mkdir -p $OUT
 
 # we assume that the binaries are in the same folder as the script
 DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
@@ -28,7 +29,7 @@ done
 # add noise {{{1
 for i in $(seq $FFR $LFR);
 do
-	file=$(printf $OUT/"%03d.tif" $i)
+	file=$(printf $OUT/"n%04d.tif" $i)
 	if [ ! -f $file ]
 	then
 		export SRAND=$RANDOM;
@@ -40,22 +41,22 @@ done
 TVL1="$DIR/tvl1flow"
 for i in $(seq $((FFR+1)) $LFR);
 do
-	file=$(printf $OUT"/%03d_b.flo" $i)
+	file=$(printf $OUT"/%04d_b.flo" $i)
 	if [ ! -f $file ]
 	then
-		$TVL1 $(printf $OUT"/%03d.tif" $i) \
-				$(printf $OUT"/%03d.tif" $((i-1))) \
+		$TVL1 $(printf $OUT"/n%04d.tif" $i) \
+				$(printf $OUT"/n%04d.tif" $((i-1))) \
 				$file \
 				0 0.25 0.2 0.3 100 0.5 5 0.01 0; 
 	fi
 done
-cp $(printf $OUT"/%03d_b.flo" $((FFR+1))) $(printf $OUT"/%03d_b.flo" $FFR)
+cp $(printf $OUT"/%04d_b.flo" $((FFR+1))) $(printf $OUT"/%04d_b.flo" $FFR)
 
 # # downsample for optical flow {{{1
 # for i in $(seq $FFR $LFR);
 # do
-# 	filein=$(printf $OUT/"%03d.tif" $i)
-# 	file=$(printf $OUT/"h%03d.tif" $i)
+# 	filein=$(printf $OUT/"%04d.tif" $i)
+# 	file=$(printf $OUT/"h%04d.tif" $i)
 # 	if [ ! -f $file ]
 # 	then
 # 		blur gauss 1.39 $filein | downsa f 2 - $file
@@ -66,22 +67,22 @@ cp $(printf $OUT"/%03d_b.flo" $((FFR+1))) $(printf $OUT"/%03d_b.flo" $FFR)
 # TVL1="/home/pariasm/Work/optical_flow/algos/tvl1flow_3/tvl1flow"
 # for i in $(seq $((FFR+1)) $LFR);
 # do
-# 	file=$(printf $OUT"/h%03d_b.flo" $i)
+# 	file=$(printf $OUT"/h%04d_b.flo" $i)
 # 	if [ ! -f $file ]
 # 	then
-# 		$TVL1 $(printf $OUT"/h%03d.tif" $i) \
-# 				$(printf $OUT"/h%03d.tif" $((i-1))) \
+# 		$TVL1 $(printf $OUT"/h%04d.tif" $i) \
+# 				$(printf $OUT"/h%04d.tif" $((i-1))) \
 # 				$file \
 # 				0 0.25 0.2 0.3 100 0.5 5 0.01 0; 
 # 	fi
 # done
-# cp $(printf $OUT"/h%03d_b.flo" $((FFR+1))) $(printf $OUT"/h%03d_b.flo" $FFR)
+# cp $(printf $OUT"/h%04d_b.flo" $((FFR+1))) $(printf $OUT"/h%04d_b.flo" $FFR)
 # 
 # # upscale optical flow {{{1
 # for i in $(seq $FFR $LFR);
 # do
-# 	filein=$(printf $OUT/"h%03d_b.flo" $i)
-# 	file=$(printf $OUT/"%03d_b.flo" $i)
+# 	filein=$(printf $OUT/"h%04d_b.flo" $i)
+# 	file=$(printf $OUT/"%04d_b.flo" $i)
 # 	if [ ! -f $file ]
 # 	then
 # 		plambda $filein "2 x *" | upsa 2 2 - $file
@@ -90,14 +91,14 @@ cp $(printf $OUT"/%03d_b.flo" $((FFR+1))) $(printf $OUT"/%03d_b.flo" $FFR)
 
 # run denoising {{{1
 $DIR/vnlmeans \
- -i $OUT"/%03d.tif" -o $OUT"/%03d_b.flo" -f $FFR -l $LFR -s $SIG \
- -d $OUT"/deno_%03d.tif" $PRM
+ -i $OUT"/n%04d.tif" -o $OUT"/%04d_b.flo" -f $FFR -l $LFR -s $SIG \
+ -d $OUT"/d%04d.tif" $PRM
 
 # compute psnr {{{1
 for i in $(seq $FFR $LFR);
 do
 	# we remove a band of 10 pixels from each side of the frame
-	MM[$i]=$(psnr.sh $(printf $SEQ $i) $(printf $OUT/"deno_%03d.tif" $i) m 10)
+	MM[$i]=$(psnr.sh $(printf $SEQ $i) $(printf $OUT/"d%04d.tif" $i) m 10)
 	MM[$i]=$(plambda -c "${MM[$i]} sqrt")
 	PP[$i]=$(plambda -c "255 ${MM[$i]} / log10 20 *")
 done

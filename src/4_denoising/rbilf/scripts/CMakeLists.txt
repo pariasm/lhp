@@ -1,1 +1,2 @@
-configure_file(vnlm_gt.sh ${CMAKE_BINARY_DIR}/bin/vnlm_gt.sh COPYONLY)
+configure_file(vnlm-gt.sh ${CMAKE_BINARY_DIR}/bin/vnlm-gt.sh COPYONLY)
+configure_file(vnlm-mp4.sh ${CMAKE_BINARY_DIR}/bin/vnlm-mp4.sh COPYONLY)
