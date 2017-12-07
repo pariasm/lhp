@@ -42,6 +42,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 "\\\\.*\\\\.swp$"
 ".\\\\.o$"
 "^${PROJECT_SOURCE_DIR}/build/"
+"^${PROJECT_SOURCE_DIR}/results/"
 "git")
 
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
