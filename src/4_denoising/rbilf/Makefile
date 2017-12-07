@@ -7,7 +7,7 @@ OMPFLAGS = -fopenmp
 BINDIR   = build/bin/
 RNLM     = $(BINDIR)vnlmeans
 TVL1     = $(BINDIR)tvl1flow
-SCRIPT   = $(BINDIR)vnlm-gt.sh $(BINDIR)vnlm-mp4.sh
+SCRIPT   = $(BINDIR)vnlm-gt.sh $(BINDIR)vnlm-mp4.sh $(BINDIR)psnr.sh
 OBJ_RNLM = lib/iio/iio.o lib/argparse/argparse.o src/main.o
 OBJ_TVL1 = lib/iio/iio.o lib/tvl1flow/main.o
 
