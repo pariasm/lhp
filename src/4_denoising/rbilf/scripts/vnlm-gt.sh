@@ -6,11 +6,13 @@ FFR=$2 # first frame
 LFR=$3 # last frame
 SIG=$4 # noise standard dev.
 OUT=$5 # output folder
-PRM=$6 # denoiser parameters
+PRM="${6}" # denoiser parameters
 
 #mkdir -p $OUT/s$SIG
 #OUT=$OUT/s$SIG
 mkdir -p $OUT
+
+echo $PRM
 
 # we assume that the binaries are in the same folder as the script
 DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
@@ -90,6 +92,10 @@ cp $(printf $OUT"/%04d_b.flo" $((FFR+1))) $(printf $OUT"/%04d_b.flo" $FFR)
 # done
 
 # run denoising {{{1
+echo \
+$DIR/vnlmeans \
+ -i $OUT"/n%04d.tif" -o $OUT"/%04d_b.flo" -f $FFR -l $LFR -s $SIG \
+ -d $OUT"/d%04d.tif" $PRM
 $DIR/vnlmeans \
  -i $OUT"/n%04d.tif" -o $OUT"/%04d_b.flo" -f $FFR -l $LFR -s $SIG \
  -d $OUT"/d%04d.tif" $PRM
