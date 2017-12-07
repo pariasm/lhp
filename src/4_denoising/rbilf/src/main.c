@@ -190,15 +190,42 @@ struct vnlmeans_params
 void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 {
 	const bool a = !(p->pixelwise); // set by caller
-	if (p->patch_sz     < 0) p->patch_sz     = a ? 8 : 5;
-	if (p->search_sz    < 0) p->search_sz    = 10;
-	if (p->weights_hx   < 0) p->weights_hx   = 0.85 * sigma;
-	if (p->weights_hd   < 0) p->weights_hd   = FLT_HUGE;
-	if (p->weights_thx  < 0) p->weights_thx  = .05f;
-	if (p->weights_ht   < 0) p->weights_ht   = 1.4 * sigma;
-	if (p->weights_htv  < 0) p->weights_htv  = 2.0 * sigma;
-	if (p->dista_lambda < 0) p->dista_lambda = 1.;
-	if (p->tv_lambda    < 0) p->tv_lambda    = 0.;
+
+	// set patch size first
+	if (p->patch_sz < 0) p->patch_sz = a ? 8 : 5;
+
+	switch (p->patch_sz)
+	{
+		case 1:
+			// the parameters are based on the following parameters
+			// found with a parameter search:
+			//
+			//           psz wsz hx   hd  ht   hv ltv  lx
+			// sigma 10:  1   10 10.2 4    7.5 0  0.5  0.1 
+			// sigma 20:  1   10 24.4 1.6 14.1 0  0.3  0.1
+			// sigma 40:  1   10 48.0 1.6 27.1 0  0.6  0.02
+			if (p->search_sz    < 0) p->search_sz    = 10;
+			if (p->weights_hx   < 0) p->weights_hx   = 1.0 * sigma;
+			if (p->weights_hd   < 0) p->weights_hd   = 2.5; 
+			if (p->weights_thx  < 0) p->weights_thx  = .05f;
+			if (p->weights_ht   < 0) p->weights_ht   = 1.4 * sigma;
+			if (p->weights_htv  < 0) p->weights_htv  = 0;
+			if (p->dista_lambda < 0) p->dista_lambda = 0.1;
+			if (p->tv_lambda    < 0) p->tv_lambda    = 0.5;
+			break;
+
+		case 4: // TODO
+		case 8:
+		default: // these are the automatic params for a patch size of 8
+			if (p->search_sz    < 0) p->search_sz    = 10;
+			if (p->weights_hx   < 0) p->weights_hx   = 0.85 * sigma;
+			if (p->weights_hd   < 0) p->weights_hd   = FLT_HUGE;
+			if (p->weights_thx  < 0) p->weights_thx  = .05f;
+			if (p->weights_ht   < 0) p->weights_ht   = 1.35 * sigma;
+			if (p->weights_htv  < 0) p->weights_htv  = 1.35 * sigma;
+			if (p->dista_lambda < 0) p->dista_lambda = 1.;
+			if (p->tv_lambda    < 0) p->tv_lambda    = 0.85;
+	}
 }
 
 // recursive bilateral filter for frame t [[[1
