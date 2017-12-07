@@ -104,7 +104,7 @@ $DIR/vnlmeans \
 for i in $(seq $FFR $LFR);
 do
 	# we remove a band of 10 pixels from each side of the frame
-	MM[$i]=$(psnr.sh $(printf $SEQ $i) $(printf $OUT/"d%04d.tif" $i) m 10)
+	MM[$i]=$($DIR/psnr.sh $(printf $SEQ $i) $(printf $OUT/"d%04d.tif" $i) m 10)
 	MM[$i]=$(plambda -c "${MM[$i]} sqrt")
 	PP[$i]=$(plambda -c "255 ${MM[$i]} / log10 20 *")
 done
