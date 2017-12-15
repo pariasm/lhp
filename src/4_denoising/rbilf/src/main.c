@@ -204,14 +204,15 @@ void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 			// sigma 10:  1   10 10.2 4    7.5 0  0.5  0.1 
 			// sigma 20:  1   10 24.4 1.6 14.1 0  0.3  0.1
 			// sigma 40:  1   10 48.0 1.6 27.1 0  0.6  0.02
-			if (p->search_sz    < 0) p->search_sz    = 10;
-			if (p->weights_hx   < 0) p->weights_hx   = 1.0 * sigma;
-			if (p->weights_hd   < 0) p->weights_hd   = 2.5; 
+			if (p->search_sz    < 0) p->search_sz    = 3;
+			if (p->weights_hx   < 0) p->weights_hx   = 1.2 * sigma;
+			if (p->weights_hd   < 0) p->weights_hd   = 1.6; 
 			if (p->weights_thx  < 0) p->weights_thx  = .05f;
-			if (p->weights_ht   < 0) p->weights_ht   = 1.4 * sigma;
+			if (p->weights_ht   < 0) p->weights_ht   = 0.7 * sigma;
 			if (p->weights_htv  < 0) p->weights_htv  = 0;
-			if (p->dista_lambda < 0) p->dista_lambda = 0.1;
 			if (p->tv_lambda    < 0) p->tv_lambda    = 0.5;
+			if (p->dista_lambda < 0) 
+				p->dista_lambda = max(0, min(0.2, 0.1 - (sigma - 20)/400));
 			break;
 
 		case 4: // TODO
@@ -1138,6 +1139,7 @@ int main(int argc, const char *argv[])
 	prms.patch_sz     = -1;
 	prms.search_sz    = -1;
 	prms.weights_hx   = -1.; // -1 means automatic value
+	prms.weights_hd   = -1.;
 	prms.weights_thx  = -1.;
 	prms.weights_ht   = -1.;
 	prms.weights_htv  = -1.;
