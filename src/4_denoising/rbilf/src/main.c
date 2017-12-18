@@ -545,7 +545,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 	float N1[psz][psz][ch]; // noisy patch at position p in frame t
 	float D1[psz][psz][ch]; // denoised patch at p in frame t (target patch)
 	float D0[psz][psz][ch]; // denoised patch at p in frame t - 1
-#if defined(WEIGHTED_AGGREGATION) || defined(VARIANCES)
+#if defined(WEIGHTED_AGGREGATION) || defined(VARIANCES) || defined(_OPENMP)
 	float V1[psz][psz];     // patch variance after the spatial average
 #endif
 
@@ -564,8 +564,11 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 #endif
 
 	// spatial denoising for frame t [[[2
-	for (int py = 0; py < h - psz + 1; py += step) // FIXME: boundary pixels
-	for (int px = 0; px < w - psz + 1; px += step) // may not be denoised
+	for (int oy = 0; oy < psz; oy += step)
+	for (int ox = 0; ox < psz; ox += step)
+	#pragma omp parallel for private(N1,D1,D0,V1)
+	for (int py = oy; py < h - psz + 1; py += psz) // FIXME: boundary pixels
+	for (int px = ox; px < w - psz + 1; px += psz) // may not be denoised
 	{
 		/* print state of iteration
 		if ((py * w * step) % 10*step == 0) printf("%4d\b\b\b\b", py, px);*/
@@ -809,6 +812,7 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 	// temporal average with frame t-1 [[[2
 	if (d0)
 	{
+		#pragma omp parallel for
 		for (int y = 0; y < h; ++y)
 		for (int x = 0; x < w; ++x)
 		if (!isnan(d0[y][x][0]))
@@ -922,7 +926,7 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 	float N1[psz][psz][ch]; // noisy patch at position p in frame t
 	float D1[psz][psz][ch]; // denoised patch at p in frame t (target patch)
 	float D0[psz][psz][ch]; // denoised patch at p in frame t - 1
-#ifdef VARIANCES
+#if defined(VARIANCES) || defined(_OPENMP)
 	float V1[psz][psz];     // patch variance after the spatial average
 #endif
 
@@ -936,16 +940,11 @@ void vnlmeans_frame(float *deno1, float *nisy1, float *deno0,
 #endif
 
 	// loop on image patches [[[2
-#if 0
 	for (int oy = 0; oy < psz; oy += step) // split in grids of non-overlapping
 	for (int ox = 0; ox < psz; ox += step) // patches (for parallelization)
-	#pragma omp parallel for
+	#pragma omp parallel for private(N1,D1,D0,V1)
 	for (int py = oy; py < h - psz + 1; py += psz)
 	for (int px = ox; px < w - psz + 1; px += psz)
-#else
-	for (int py = 0; py < h - psz + 1; py += step) // FIXME: boundary pixels
-	for (int px = 0; px < w - psz + 1; px += step) // may not be denoised
-#endif
 	{
 		//	load target patch [[[3
 		for (int hy = 0; hy < psz; ++hy)
