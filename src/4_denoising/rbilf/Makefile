@@ -1,4 +1,4 @@
-CFLAGS   = -std=c99 -O3 -DNDEBUG -w
+CFLAGS   = -std=c99 -O3 -DNDEBUG -w -fopenmp
 CXXFLAGS = -O3 -DNDEBUG -w
 CPPFLAGS = -Ilib/iio -Ilib/argparse -Ilib/tvl1flow
 LDLIBS   = -ljpeg -lpng -ltiff -lm
@@ -12,7 +12,7 @@ OBJ_RNLM = lib/iio/iio.o lib/argparse/argparse.o src/main.o
 OBJ_TVL1 = lib/iio/iio.o lib/tvl1flow/main.o
 
 all          : $(RNLM) $(TVL1) $(SCRIPT)
-$(RNLM)      : $(OBJ_RNLM) $(BINDIR) ; $(CC) $(LDFLAGS) -o $@ $(OBJ_RNLM) $(LDLIBS)
+$(RNLM)      : $(OBJ_RNLM) $(BINDIR) ; $(CC) $(LDFLAGS) $(OMPFLAGS) -o $@ $(OBJ_RNLM) $(LDLIBS)
 $(TVL1)      : $(OBJ_TVL1) $(BINDIR) ; $(CC) $(LDFLAGS) $(OMPFLAGS) -o $@ $(OBJ_TVL1) $(LDLIBS)
 $(BINDIR)%.sh: scripts/%.sh $(BINDIR); cp $< $@ 
 $(BINDIR)    : ; mkdir -p $@
