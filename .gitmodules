@@ -1,3 +1,6 @@
 [submodule "src/utils/imscript"]
 	path = src/utils/imscript
 	url = https://github.com/mnhrdt/imscript.git
+[submodule "src/4_denoising/rnlmeans"]
+	path = src/4_denoising/rnlmeans
+	url = https://github.com/pariasm/rnlmeans.git
