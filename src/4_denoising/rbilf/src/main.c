@@ -204,15 +204,19 @@ void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 			// sigma 10:  1   10 10.2 4    7.5 0  0.5  0.1 
 			// sigma 20:  1   10 24.4 1.6 14.1 0  0.3  0.1
 			// sigma 40:  1   10 48.0 1.6 27.1 0  0.6  0.02
-			if (p->search_sz    < 0) p->search_sz    = 3;
 			if (p->weights_hx   < 0) p->weights_hx   = 1.2 * sigma;
 			if (p->weights_hd   < 0) p->weights_hd   = 1.6; 
+			if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
 			if (p->weights_thx  < 0) p->weights_thx  = .05f;
 			if (p->weights_ht   < 0) p->weights_ht   = 0.7 * sigma;
 			if (p->weights_htv  < 0) p->weights_htv  = 0;
 			if (p->tv_lambda    < 0) p->tv_lambda    = 0.5;
 			if (p->dista_lambda < 0) 
 				p->dista_lambda = max(0, min(0.2, 0.1 - (sigma - 20)/400));
+
+			// limit search region to prevent too long running times
+			p->search_sz = min(15, min(3*p->weights_hd, p->search_sz));
+
 			break;
 
 		case 4: // TODO
@@ -564,8 +568,8 @@ void vnlmeans_kalman_frame(float *deno1, float *nisy1, float *deno0,
 #endif
 
 	// spatial denoising for frame t [[[2
-	for (int oy = 0; oy < psz; oy += step)
-	for (int ox = 0; ox < psz; ox += step)
+	for (int oy = 0; oy < psz; oy += step) // split in grids of non-overlapping
+	for (int ox = 0; ox < psz; ox += step) // patches (for parallelization)
 	#pragma omp parallel for private(N1,D1,D0,V1)
 	for (int py = oy; py < h - psz + 1; py += psz) // FIXME: boundary pixels
 	for (int px = ox; px < w - psz + 1; px += psz) // may not be denoised
