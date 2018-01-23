@@ -38,13 +38,15 @@ void DCTThreadsHandler::init(
 	nthreads = std::min(nthreads, omp_get_max_threads());
 	if (nthreads > 100)
 	{
-		fprintf(stderr,"Error: DCTThreadsHandler is hard-coded for a maximum of 100 threads\n");
+		fprintf(stderr,"Error: DCTThreadsHandler is hard-coded"
+		               "for a maximum of 100 threads\n");
 		exit(1);
 	}
 #else
 	if (nthreads > 1)
 	{
-		fprintf(stderr,"Error: DCTThreadsHandler can't handle %d threads (no OpenMP)\n", nthreads);
+		fprintf(stderr,"Error: DCTThreadsHandler can't handle"
+		               "%d threads (no OpenMP)\n", nthreads);
 		exit(1);
 	}
 #endif
@@ -55,7 +57,7 @@ void DCTThreadsHandler::init(
 	// define method based on patch size
 //	method = (width * height * frames < 32) ? MATPROD : FFTW;
 	method = FFTW;
-//	method = MATPROD;
+//	method = MATPROD; // FIXME: MATPROD IS NOT WORKING!
 
 //	fprintf(stderr, "init DCT for %d thread - %d x %d x %d ~ %d\n",nthreads, width, height, frames, nsignals);
 

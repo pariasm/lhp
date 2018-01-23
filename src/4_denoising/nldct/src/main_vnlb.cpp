@@ -50,10 +50,6 @@ int main(int argc, char **argv)
 	const string  final_path = clo_option("-deno" , "deno_%03d.png" , "> denoised sequence");
 	const string  basic_path = clo_option("-bsic" , "bsic_%03d.png" , "> basic denoised sequence");
 	const string   diff_path = clo_option("-diff" , "diff_%03d.png" , "> difference sequence");
-	// TODO: these should be determined automatically from the other outputs.
-	const string   bias_path = clo_option("-bdeno", "bdeno_%03d.png", "> bias sequence");
-	const string bbasic_path = clo_option("-bbsic", "bbsic_%03d.png", "> bias basic sequence");
-	const string  bdiff_path = clo_option("-bdiff", "bdiff_%03d.png", "> bias difference sequence");
 
 	const unsigned firstFrame = clo_option("-f", 0, "first frame");
 	const unsigned lastFrame  = clo_option("-l", 0, "last frame");
@@ -229,6 +225,12 @@ int main(int argc, char **argv)
 		VideoUtils::addNoise(original, noisy, sigma, verbose);
 
 	//! Save noisy video
+	if (noisy_path != "")
+	{
+		if (verbose) printf("Saving noisy video\n");
+		noisy.saveVideo(noisy_path, firstFrame, frameStep);
+	}
+
 	if (mode == NISY_ONLY)
 	{
 		if (!has_noise && sigma)
@@ -236,10 +238,6 @@ int main(int argc, char **argv)
 			float noisy_psnr = -1, noisy_rmse = -1;
 			VideoUtils::computePSNR(original, noisy, noisy_psnr, noisy_rmse);
 			writingMeasures("measures.txt", sigma, noisy_psnr, noisy_rmse, 0, true, "_noisy");
-
-			if (verbose) printf("Saving noisy video\n");
-			noisy.saveVideo(noisy_path, firstFrame, frameStep);
-
 			return EXIT_SUCCESS;
 		}
 		else
@@ -310,6 +308,9 @@ int main(int argc, char **argv)
 	    printf("basic PSNR =\t%f\tRMSE =\t%f\n", basic_psnr, basic_rmse);
 	    printf("final PSNR =\t%f\tRMSE =\t%f\n", final_psnr, final_rmse);
 	}
+	else if (mode != NISY_ONLY)
+		printf("%f %f\n", final_psnr, basic_psnr);
+
 
 	//! Write measures
 	writingMeasures("measures.txt", sigma, basic_psnr, basic_rmse, groupsRatio[0], true  , "_basic");
@@ -324,35 +325,6 @@ int main(int argc, char **argv)
 	if (prms2.sizePatch) final.saveVideo(final_path, firstFrame, frameStep);
 	if (prms2.sizePatch) diff .saveVideo( diff_path, firstFrame, frameStep);
 	                     basic.saveVideo(basic_path, firstFrame, frameStep);
-
-#if 0
-	//! Computing bias sequence
-	Video<float> bias, bias_basic, bias_diff;
-	if (do_bias) {
-		if (verbose) cout << "Applying NL-Bayes to the original image :" << endl;
-
-		runNlBayes(im, imBasicBias, imBias, imSize, flat_area1, flat_area2, sigma, verbose);
-
-		if (verbose) cout << endl;
-
-		float psnrBias, psnrBiasBasic, rmseBias, rmseBiasBasic;
-		computePsnr(im, imBasicBias, psnrBiasBasic, rmseBiasBasic, "imBiasBasic", verbose);
-		computePsnr(im, imBias     , psnrBias     , rmseBias     , "imBiasFinal", verbose);
-
-		//! writing measures
-		writingMeasures("measures.txt", sigma, psnrBiasBasic, rmseBiasBasic, false, "_bias_basic");
-		writingMeasures("measures.txt", sigma, psnrBias     , rmseBias     , false, "_bias      ");
-
-		
-		computeDiff(im, imBias, imDiffBias, sigma, 0.f, 255.f, verbose);
-
-		saveImage(argv[7], imBias     , imSize, 0.f, 255.f);
-		saveImage(argv[8], imBasicBias, imSize, 0.f, 255.f);
-		saveImage(argv[9], imDiffBias , imSize, 0.f, 255.f);
-	}
-
-
-#endif
 
 	if (verbose) printf("Done\n");
 	return EXIT_SUCCESS;

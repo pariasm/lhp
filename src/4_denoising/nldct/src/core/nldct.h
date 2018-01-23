@@ -138,8 +138,8 @@ void initializeNlbParameters(
 ,	const unsigned p_step
 ,	const float p_sigma
 ,	const VideoSize &p_size
-,	const bool p_useArea
-,	const bool p_verbose
+,	const bool p_useArea = false
+,	const bool p_verbose = true
 ,	const unsigned timeSearchRangeFwd = 0
 ,	const unsigned timeSearchRangeBwd = 0
 ,	const unsigned sizePatchTime = 1
