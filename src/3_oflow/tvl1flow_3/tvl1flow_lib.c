@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <omp.h>
 
 #include "mask.c"
 #include "bicubic_interpolation.c"
@@ -307,6 +308,7 @@ void Dual_TVL1_optic_flow_multiscale(
 		const float lambda,  // weight parameter for the data term
 		const float theta,   // weight parameter for (u - v)²
 		const int   nscales, // number of scales
+		const int   fscale , // finer scale (drop the scales finer than this one)
 		const float zfactor, // factor for building the image piramid
 		const int   warps,   // number of warpings per scale
 		const float epsilon, // tolerance for numerical convergence
@@ -360,7 +362,7 @@ void Dual_TVL1_optic_flow_multiscale(
 		u1s[nscales-1][i] = u2s[nscales-1][i] = 0.0;
 
 	// pyramidal structure for computing the optical flow
-	for (int s = nscales-1; s >= 0; s--)
+	for (int s = nscales-1; s >= fscale; s--)
 	{
 		if (verbose)
 			fprintf(stderr, "Scale %d: %dx%d\n", s, nx[s], ny[s]);
@@ -371,6 +373,25 @@ void Dual_TVL1_optic_flow_multiscale(
 				tau, lambda, theta, warps, epsilon, verbose
 		);
 
+		// if this was the last scale, finish now
+		if (!s) break;
+
+		// otherwise, upsample the optical flow
+
+		// zoom the optical flow for the next finer scale
+		zoom_in(u1s[s], u1s[s-1], nx[s], ny[s], nx[s-1], ny[s-1]);
+		zoom_in(u2s[s], u2s[s-1], nx[s], ny[s], nx[s-1], ny[s-1]);
+
+		// scale the optical flow with the appropriate zoom factor
+		for (int i = 0; i < nx[s-1] * ny[s-1]; i++)
+		{
+			u1s[s-1][i] *= (float) 1.0 / zfactor;
+			u2s[s-1][i] *= (float) 1.0 / zfactor;
+		}
+	}
+
+	for(int s = fscale - 1; s >= 0; s--)
+	{
 		// if this was the last scale, finish now
 		if (!s) break;
 
