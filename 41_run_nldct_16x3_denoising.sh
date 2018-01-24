@@ -28,7 +28,7 @@ fi
 mkdir -p $OUTPUT_DIR
 
 # nldct binary
-DENO="src/4_denoising/nldct/build/bin/vnlbayes"
+DENO="src/4_denoising/nldct/build/bin/nldct"
 SIGMA=$(cat "$INPUT_DIR/sigma.txt")
 
 # run denoising (first step)
