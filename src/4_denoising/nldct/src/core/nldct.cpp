@@ -173,35 +173,68 @@ void initializeNlbParameters(
 	//! Standard deviation of the noise
 	o_params.sigma = p_sigma;
 
-	//! Patch size, spatial dimension
 	if (p_size.channels == 1)
 	{
-		if(s1) o_params.sizePatch = (p_sigma < 30.f ? 5 : 7);
-		else   o_params.sizePatch = 5;
+		/* These parameters were optimized for videos using
+		 * the following grayscale videos of the derf-hd database
+		 * park_joy station2 speed_bag sunflower tractor
+		 *
+		 * For training we considered only the frames 70~85 and
+		 * three noise levels 10, 20, 40
+		 *
+		 * We only optimized the params np1, np2, b1, b2 (num of
+		 * similar patches and beta coefficients). The search region
+		 * was 7x7x9 (4 frames before and 4 after). We trained for 
+		 * two patches sizes: (8x8x1 and 6x6x2).
+		 */
+
+		//! Patch size, temporal dimension
+		o_params.sizePatchTime = sizePatchTime;
+
+		//! Patch size, spatial dimension (smaller for 3D patches)
+		o_params.sizePatch = (sizePatchTime > 1) ? 6 : 8;
+
+		//! Number of similar patches
+		o_params.nSimilarPatches = (s1) ? round(3.f*p_sigma) 
+		                                : round((p_sigma - 10.)/3. + 10.);
+
+		//! Search window, temporal search radii
+		o_params.sizeSearchTimeRangeFwd = timeSearchRangeFwd;
+		o_params.sizeSearchTimeRangeBwd = timeSearchRangeBwd;
+
+		//! Size of the search window around the reference patch (must be odd)
+		//  We choose it so that it has the same search volume as vbm3d 
+		//  (7x7x9 patches)
+		o_params.sizeSearchWindow = (int)(round(sqrt(7.*7.*9. /
+			(float)(timeSearchRangeFwd + timeSearchRangeBwd + 1)))/2)*2 + 1;
+
+		//! Parameter to amplify the noise during filtering
+		o_params.beta = (s1) ? 0.8 : 1.3;
 	}
-	else
+	else // assuming RGB
 	{
+		// TODO: these parameters were not optimized
+		//       they come from marc's nlbayes code
+
+		//! Patch size, spatial dimension
 		if(s1) o_params.sizePatch = (p_sigma < 20.f ? 3 : (p_sigma < 50.f ? 5 : 7));
 		else   o_params.sizePatch = (p_sigma < 50.f ? 3 : (p_sigma < 70.f ? 5 : 7));
-	}
 
-	//! Patch size, temporal dimension
-	o_params.sizePatchTime = sizePatchTime;
-
-	//! Number of similar patches
-	if (p_size.channels == 1)
-	{
-		if(s1) o_params.nSimilarPatches = (p_sigma < 10.f ?  35 : 
-		                                  (p_sigma < 30.f ?  45 : 
-		                                  (p_sigma < 80.f ?  90 : 
-		                                                    100))); // ASK MARC differs from manuscript
-		else   o_params.nSimilarPatches = (p_sigma < 20.f ?  15 : 
-		                                  (p_sigma < 40.f ?  25 :
-		                                  (p_sigma < 80.f ?  30 :
-		                                                     45))); // ASK MARC differs from manuscript
-	}
-	else
+		//! Number of similar patches
 		o_params.nSimilarPatches = o_params.sizePatch * o_params.sizePatch * 3;
+
+		//! Search window, temporal search radii
+		o_params.sizeSearchTimeRangeFwd = timeSearchRangeFwd;
+		o_params.sizeSearchTimeRangeBwd = timeSearchRangeBwd;
+		o_params.nSimilarPatches *= timeSearchRangeFwd + timeSearchRangeBwd + 1;
+
+		//! Size of the search window around the reference patch (must be odd)
+		o_params.sizeSearchWindow = o_params.nSimilarPatches / 2;
+		if (o_params.sizeSearchWindow % 2 == 0) o_params.sizeSearchWindow++;
+
+		//! Parameter to amplify the noise during filtering
+		o_params.beta = 1.f;
+	}
 
 	//! Offset: step between two similar patches
 	o_params.offSet     = std::max((unsigned)1, o_params.sizePatch     / 2);
@@ -211,34 +244,11 @@ void initializeNlbParameters(
 	//! Use the homogeneous area detection trick
 	o_params.useHomogeneousArea = p_flatArea;
 
-	//! Size of the search window around the reference patch (must be odd)
-	o_params.sizeSearchWindow = o_params.nSimilarPatches / 2; // ASK MARC and 7*sizePatch1 in IPOL manuscript
-	if (o_params.sizeSearchWindow % 2 == 0) o_params.sizeSearchWindow++;
-
-	//! Search window, temporal search radii
-	o_params.sizeSearchTimeRangeFwd = timeSearchRangeFwd;
-	o_params.sizeSearchTimeRangeBwd = timeSearchRangeBwd;
-	o_params.nSimilarPatches *= timeSearchRangeFwd + timeSearchRangeBwd + 1;
-
-	//! Size of boundaries used during the sub division
-	o_params.boundary = 2*(o_params.sizeSearchWindow/2) + (o_params.sizePatch - 1);
-
 	//! Parameter used to determine if an area is homogeneous
 	o_params.gamma = 1.05f;
 
-	//! Parameter used to estimate the covariance matrix
-	if (p_size.channels == 1)
-	{
-		o_params.beta = 1.f;
-//		if(s1) o_params.beta = (p_sigma < 15.f ? 1.1f : (p_sigma < 70.f ? 1.f : 0.9f));
-//		else   o_params.beta = (p_sigma < 15.f ? 1.1f : (p_sigma < 35.f ? 1.f : 0.9f));
-	}
-	else
-	{
-		o_params.beta = 1.f;
-//		if(s1) o_params.beta = 1.f;
-//		else   o_params.beta = (p_sigma < 50.f ? 1.2f : 1.f);
-	}
+	//! Size of boundaries used during the sub division
+	o_params.boundary = 2*(o_params.sizeSearchWindow/2) + (o_params.sizePatch - 1);
 
 	//! Noise correction factor in case of filtering the group baricenter
 	o_params.betaMean = 1.f;
@@ -307,10 +317,10 @@ void setSizeSearchWindow(nlbParams& prms, unsigned sizeSearchWindow)
 {
 	prms.sizeSearchWindow = sizeSearchWindow;
 	prms.boundary = 2*(sizeSearchWindow/2) + (prms.sizePatch - 1);
-	prms.nSimilarPatches = std::min(prms.nSimilarPatches, sizeSearchWindow *
-	                                                      sizeSearchWindow *
-	                                                     (prms.sizeSearchTimeRangeFwd +
-	                                                      prms.sizeSearchTimeRangeBwd + 1));
+//	prms.nSimilarPatches = std::min(prms.nSimilarPatches, sizeSearchWindow *
+//	                                                      sizeSearchWindow *
+//	                                                     (prms.sizeSearchTimeRangeFwd +
+//	                                                      prms.sizeSearchTimeRangeBwd + 1));
 }
 
 /**
