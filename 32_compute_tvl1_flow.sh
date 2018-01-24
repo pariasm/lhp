@@ -20,12 +20,15 @@ TVL1="src/3_oflow/tvl1flow_3/tvl1flow"
 
 mkdir -p $O
 
+DW=0.1 # weight of data attachment term 0.1 ~ very smooth 0.2 ~ noisy
+FS=1   # finest scale (0 image scale, 1 one coarser level, 2 more coarse, etc...
+
 # compute forward flow
 for i in `seq $F $((L - 1))`;
 do
 	$TVL1 `printf ${D} $i` `printf ${D} $((i + 1))` \
 		   ${O}/`printf %03d.f.flo $i` \
-		   0 0.25 0.2 0.3 100 0.5 5 0.01 0; 
+		   0 0.25 $DW 0.3 100 $FS 0.5 5 0.01 0; 
 done
 cp ${O}/`printf %03d.f.flo $((L - 1))` ${O}/`printf %03d.f.flo $L`
 
@@ -34,7 +37,7 @@ for i in `seq $((F + 1)) $L`;
 do
 	$TVL1 `printf ${D} $i` `printf ${D} $((i - 1))` \
 		   ${O}/`printf %03d.b.flo $i` \
-		   0 0.25 0.2 0.3 100 0.5 5 0.01 0; 
+		   0 0.25 $DW 0.3 100 $FS 0.5 5 0.01 0; 
 done
 cp ${O}/`printf %03d.b.flo $((F + 1))` ${O}/`printf %03d.b.flo $F`
 
