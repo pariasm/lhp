@@ -34,6 +34,8 @@ SIGMA=$(cat "$INPUT_DIR/sigma.txt")
 
 # run denoising (first step)
 $DENO \
--i ${INPUT_DIR}/%03d.tif -f $F -l $L -s $SIGMA -o ${OFLOW_DIR}/%03d.b.flo \
+-i ${INPUT_DIR}/%03d.tif -f $F -l $L -s $SIGMA \
+-o ${OFLOW_DIR}/%03d.b.flo \
+-k ${OFLOW_DIR}/occ.%03d.b.1.00.png \
 -d ${OUTPUT_DIR}/d_%03d.tif -v
 

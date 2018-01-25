@@ -43,3 +43,7 @@ fi
 ## 
 ## # clean intermediate data
 ## rm -rf $FLOW_DIR
+
+# compute occlusion masks
+./34_compute_occlusion_masks.sh $FLOW_DIR $F $L
+
