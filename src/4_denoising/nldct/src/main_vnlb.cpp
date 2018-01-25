@@ -95,6 +95,7 @@ int main(int argc, char **argv)
 	const bool no_paste2  = (bool) clo_option("-no-paste2", false , "> disable paste trick, step 2");
 	const bool no_step1   = (bool) clo_option("-no-step1" , false , "> disable patch skipping, step 1");
 	const bool no_step2   = (bool) clo_option("-no-step2" , false , "> disable patch skipping, step 2");
+	const bool causal     = (bool) clo_option("-causal", false , "> uses only past frames for search");
 
 	//! Check inputs
 	if (input_path == "")
@@ -172,6 +173,8 @@ int main(int argc, char **argv)
 		VideoNLB::initializeNlbParameters(prms2, 2, sigma, tmp, flat_area2, verbose, time_search2, time_search2, patch_sizet2);
 
 		//! Override with command line parameters
+		if (causal) prms1.sizeSearchTimeRangeFwd = 0;
+		if (causal) prms2.sizeSearchTimeRangeFwd = 0;
 		if (space_search1 >= 0) VideoNLB::setSizeSearchWindow(prms1, (unsigned)space_search1);
 		if (space_search2 >= 0) VideoNLB::setSizeSearchWindow(prms2, (unsigned)space_search2);
 		if (patch_sizex1  >= 0) VideoNLB::setSizePatch(prms1, tmp, (unsigned)patch_sizex1);;
@@ -256,6 +259,8 @@ int main(int argc, char **argv)
 	VideoNLB::initializeNlbParameters(prms2, 2, sigma, noisy.sz, flat_area2, verbose, time_search2, time_search2, patch_sizet2);
 
 	//! Override with command line parameters
+	if (causal) prms1.sizeSearchTimeRangeFwd = 0;
+	if (causal) prms2.sizeSearchTimeRangeFwd = 0;
 	if (space_search1 >= 0) VideoNLB::setSizeSearchWindow(prms1, (unsigned)space_search1);
 	if (space_search2 >= 0) VideoNLB::setSizeSearchWindow(prms2, (unsigned)space_search2);
 	if (patch_sizex1  >= 0) VideoNLB::setSizePatch(prms1, noisy.sz, (unsigned)patch_sizex1);;
