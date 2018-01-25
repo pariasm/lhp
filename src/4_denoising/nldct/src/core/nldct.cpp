@@ -404,7 +404,7 @@ void printNlbParameters(
 	printf("\t\tNumber of patches           = %d\n"       , i_prms.nSimilarPatches);
 	printf("\t\tDistance threshold (tau)    = %g\n"       , i_prms.tau);
 	printf("\t\tSpatial search window       = %dx%d\n"    , i_prms.sizeSearchWindow, i_prms.sizeSearchWindow);
-	printf("\t\tTemporal search range       = [-%d,%d]\n" , i_prms.sizeSearchTimeRangeBwd, i_prms.sizeSearchTimeRangeBwd);
+	printf("\t\tTemporal search range       = [-%d,%d]\n" , i_prms.sizeSearchTimeRangeBwd, i_prms.sizeSearchTimeRangeFwd);
 	printf("\t\tSpatial border added        = %d\n"       , i_prms.boundary);
 	printf("\tGroup filtering:\n");
 	printf("\t\tBeta                        = %g\n"       , i_prms.beta);
