@@ -12,8 +12,8 @@ L=${3:-0} # last frame
 
 SEQUENCE=$1
 INPUT_DIR="output_data/2_stabilization/$SEQUENCE"
-OFLOW_DIR="output_data/3_oflow/$SEQUENCE"
-OUTPUT_DIR="output_data/4_denoising/$SEQUENCE/rnlmeans"
+OFLOW_DIR="output_data/3_oflow_dw0.10/$SEQUENCE"
+OUTPUT_DIR="output_data/4_denoising/$SEQUENCE/rnlmeans-dw0.10"
 
 # determine last frame
 if [ $L -lt 1 ];

@@ -11,10 +11,10 @@ F=${2:-1} # first frame
 L=${3:-0} # last frame 
 
 SEQUENCE=$1
-echo "Computing optical flow for sequence $SEQUENCE. Output stored in output_data/3_oflow/$SEQUENCE/"
-
 INPUT_DIR="output_data/2_stabilization/$SEQUENCE"
-FLOW_DIR="output_data/3_oflow/$SEQUENCE"
+FLOW_DIR="output_data/3_oflow_dw0.10/$SEQUENCE"
+
+echo "Computing optical flow for sequence $SEQUENCE. Output stored in $FLOW_DIR."
 
 # determine last frame
 if [ $L -lt 1 ];
@@ -23,7 +23,7 @@ then
 	L=$((F + N - 1))
 fi
 
-# compute forwared and backward optical flow
+# compute forward and backward optical flow
 ./32_compute_tvl1_flow.sh $INPUT_DIR/%03d.tif $F $L $FLOW_DIR
 
 ## the downsampling and upsampling is now done in the tvl1code,
