@@ -95,7 +95,7 @@ struct VideoSize
 
 	inline unsigned index(VideoBC bc_type, unsigned x, unsigned y, unsigned t, unsigned c) const
 	{
-		assert(c >= 0 && c < sz.channels);
+		assert(c >= 0 && c < channels);
 
 		switch (bc_type)
 		{
