@@ -27,7 +27,7 @@ range.txt: avg_lin.tif
 avg_lin.png: avg_lin.tif range.txt
 	plambda avg_lin.tif "`cat range.txt` qe" -o avg_lin.png
 
-# remove bands using Yohann's program
+# remove bands using srcmire_2
 ub_avg_lin.png: avg_lin.png
 ifeq ($(BANDS_DIRECTION),horizontal)
 	# transpose

@@ -1,5 +1,9 @@
 #! /bin/bash
 
+SEQUENCE=$1
+F=${2:-1} # first frame
+L=${3:-0} # last frame
+
 # zoom factor
 ZF=2
 
@@ -10,12 +14,8 @@ then
 	exit 1
 fi
 
-F=${2:-1} # first frame
-L=${3:-0} # last frame
-
 PLAMBDA="src/utils/imscript/bin/plambda"
 
-SEQUENCE=$1
 INPUT_DIR="output_data/3_oflow/$SEQUENCE/downscaled/"
 OUTPUT_DIR="output_data/3_oflow/$SEQUENCE"
 echo "	Upscaling sequence $INPUT_DIR. Output stored in $OUTPUT_DIR"

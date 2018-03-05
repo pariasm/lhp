@@ -1,16 +1,15 @@
 #! /bin/bash
 
+INPUT_DIR=$1
+F=${2:-1} # first frame
+L=${3:-0} # last frame
+
 # check correct number of input args
 if [ "$#" -lt 1 ];
 then
 	echo "Usage: $0 sequence-folder [first-frame last-frame]" >&2
 	exit 1
 fi
-
-INPUT_DIR=$1
-
-F=${2:-1} # first frame
-L=${3:-0} # last frame
 
 PLAMBDA="src/utils/imscript/bin/plambda"
 
@@ -21,7 +20,6 @@ then
 	L=$((F + N - 1))
 fi
 
-SEQUENCE=$1
 OUTPUT_DIR=$INPUT_DIR
 echo "	Computing occlusion masks for sequence $INPUT_DIR for frames $F til $L."
 echo "	Output stored in $OUTPUT_DIR."

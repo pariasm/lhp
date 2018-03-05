@@ -1,5 +1,10 @@
 #! /bin/bash
 
+# command line inputs
+SEQUENCE=$1 # sequence folder
+F=${2:-1}   # first frame (optional: default 1)
+L=${3:-0}   # last frame  (optional: default all frames)
+
 # check correct number of input args
 if [ "$#" -lt 1 ]; 
 then
@@ -7,10 +12,6 @@ then
 	exit 1
 fi
 
-F=${2:-1} # first frame
-L=${3:-0} # last frame
-
-SEQUENCE=$1
 INPUT_DIR="output_data/1_preprocessing/$SEQUENCE"
 SIGMAS="output_data/1_preprocessing/$SEQUENCE/sigmas.txt"
 OUTPUT="output_data/1_preprocessing/$SEQUENCE/sigma.txt"
@@ -44,6 +45,8 @@ fi
 PONO=src/1_preprocessing/ponomarenko/ponomarenko
 CONVICON=src/utils/convicon/bin/convicon
 DOWNSA="src/utils/imscript/bin/downsa"
+
+# downsampling factor
 ZF=2
 
 # step (only run ponomarenko in 1/S of the frames)

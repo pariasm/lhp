@@ -1,5 +1,9 @@
 #! /bin/bash
 
+SEQUENCE=$1
+F=${2:-1} # first frame
+L=${3:-0} # last frame 
+
 # check correct number of input args
 if [ "$#" -lt 1 ]; 
 then
@@ -7,10 +11,6 @@ then
 	exit 1
 fi
 
-F=${2:-1} # first frame
-L=${3:-0} # last frame 
-
-SEQUENCE=$1
 echo "Denoising sequence $SEQUENCE. Output stored output_data/4_denoising/$SEQUENCE/"
 
 INPUT_DIR="output_data/2_stabilization/$SEQUENCE"
