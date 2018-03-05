@@ -11,16 +11,18 @@ F=${2:-1} # first frame
 L=${3:-0} # last frame 
 
 # temporal size of patch
-PT=2
+WT=1
+PT=1
+CAUSAL=-causal
 
 SEQUENCE=$1
 INPUT_DIR="output_data/2_stabilization/$SEQUENCE"
 OFLOW_DIR="output_data/3_oflow/$SEQUENCE"
 if [ $PT == 1 ];
 then
-	OUTPUT_DIR="output_data/4_denoising/$SEQUENCE/nldct-8x1"
+	OUTPUT_DIR="output_data/4_denoising/$SEQUENCE/nldct-8x1-wt${WT}$CAUSAL"
 else
-	OUTPUT_DIR="output_data/4_denoising/$SEQUENCE/nldct-6x2"
+	OUTPUT_DIR="output_data/4_denoising/$SEQUENCE/nldct-6x2-wt${WT}$CAUSAL"
 fi
 
 echo "Denoising sequence $SEQUENCE. Output stored in $OUTPUT_DIR"
@@ -44,7 +46,7 @@ SIGMA=$(cat "$INPUT_DIR/sigma.txt")
 $DENO \
 -i ${INPUT_DIR}/%03d.tif -f $F -l $L -sigma $SIGMA -has-noise \
 -fof ${OFLOW_DIR}/%03d.f.flo -bof ${OFLOW_DIR}/%03d.b.flo \
--px2 0 -pt1 $PT -wt1 4 -bsic ${OUTPUT_DIR}/b_%03d.tif
+-px2 0 -pt1 $PT -wt1 $WT $CAUSAL -bsic ${OUTPUT_DIR}/b_%03d.tif
 
 mv measures.txt ${OUTPUT_DIR}/measures_basic
 
@@ -53,7 +55,7 @@ $DENO \
 -i ${INPUT_DIR}/%03d.tif -f $F -l $L -sigma $SIGMA -has-noise \
 -b ${OUTPUT_DIR}/b_%03d.tif \
 -fof ${OFLOW_DIR}/%03d.f.flo -bof ${OFLOW_DIR}/%03d.b.flo \
--px1 0 -pt2 $PT -wt2 4 -deno ${OUTPUT_DIR}/d_%03d.tif
+-px1 0 -pt2 $PT -wt2 $WT $CAUSAL -deno ${OUTPUT_DIR}/d_%03d.tif
 
 # clean
 rm {bsic,diff}_???.png
