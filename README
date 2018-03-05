@@ -1,31 +1,35 @@
 PROCESSING PIPELINE
 ===================
 
-After some testing with the videos, we converged to the following pipeline:
+This a video processing pipeline with the objective of stabilizing and denoising 
+an input video acquired with a hand-held camera. The pipeline has the following steps:
 
-1/ Noise preprocessing (Thibaud, Enric)
+1/ Noise preprocessing
 	- variance stabilization
 	- impulse noise removal
 	- column noise removal
+	- noise variance estimation
 
-2/ Video stabilization (Javier, Nelson)
+2/ Video stabilization
+	- video stabilization
+	- downsampling
 
-3/ Optical flow computation (Javier, Nelson)
+3/ Optical flow computation
+	- TVL1 optical flow
+	- occlusion detection
 
-4/ Video denoising (Javier, Nelson, Enric, Thibaud, Pablo)
-	- zoom out
-	- temporal averaging
-	- NL-Bayes
-	- NL-Bayes with fixed basis
-	- Recursive NL-Bayes
+4/ Video denoising
+	- NL-DCT
+	- Recursive bilateral filter
+	- Backward NL-Kalman filter
 
-5/ Video deblurring (Jérémy)
+5/ Video deblurring
 
 
 DATASET
 =======
 
-L'H gave us 6 videos, summarized here (from Enric's slides):
+L'H gave us 6 videos, summarized here:
 
 id | frames | min     max   #values | comments                      | filename                         
 ===| =======| ======================| ==============================| ==============================
@@ -56,8 +60,10 @@ Some minimal rules:
 			- 40_run_denoising.sh
 			- 50_run_deblurring.sh
 
-	  help scripts can be called from the step scripts:
+	  helper scripts can be called from the main scripts at each step:
 			- 11_remove_impulse_noise.sh
+			- 32_compute_tvl1_flow.sh
+			- 34_compute_occlusion_masks.sh
 
 	* src/ contains the source code. There is a folder for each step
 
@@ -66,33 +72,123 @@ lhp
 ├── input_data     # read only; not in repo
 │   ├── 5
 │   ├── c
-│   ├── J
-│   ├── m
-│   ├── p
-│   └── Z
+│   ...
 ├── output_data          # read/write; not in repo
 │   ├── 1_preprocessing  # outputs of step 1
 │   │   ├── 5
 │   │   ├── c
-│   │   ├── J
-│   │   ├── m
-│   │   ├── p
-│   │   └── Z
-│   ├── 2_stabilization
+│   │   ...
+│   ├── 2_stabilization  # outputs of step 2
+│   │   ├── 5
+│   │   ├── c
+│   │   ...
 │   ├── 3_oflow
+│   │   ├── 5
+│   │   ├── c
+│   │   ...
 │   └── 4_denoising
+│       ├── 5
+│       ├── c
+│       ...
 ├── src                 # source code
 │   ├── 1_preprocessing
 │   ├── 2_stabilization
 │   ├── 3_oflow
-│   └── 4_denoising
+│   ├── 4_denoising
+│   ├── 5_deblurring
+│   └── utils
 ├── 10_preprocess_noise.sh      # main script for step 1
 ├── 11_remove_impulse_noise.sh  # helper scripts for step 1
 ├── 20_stabilize_video.sh       # main script for step 2, etc
-├── 30_compute_optical_flow.sh
+├── 30_compute_optical_flow.sh  # main script for step 3
+├── 31_...                      # helper scripts for step 3
+├── 32_...
 ├── 40_run_denoising.sh
+├── 41_...
 ├── 50_run_deblurring.sh
+├── 51_...
 └── README                      # this file
+
+
+
+
+SOURCE CODE COMPONENTS
+======================
+
+src/utils/imscript
+------------------
+
+A (large) collection of small and stand-alone utilities for image processing.
+For more information see the projects repo: 
+
+https://github.com/mnhrdt/imscript
+
+Only the following utilities are used:
+- veco       - compute per-pixel statistics over many images
+- simpois    - inpainting (to fix impulsive noise)
+- plambda    - compute lambda expressions on image pixels
+- imprintf   - print statistics of images specified using a printf format
+- imflip     - flip and transpose images
+- downsa     - downsample
+- upsa       - upsample 
+
+downsa and upsa are used to downscale and upscale the video. The rest are used 
+for the noise pre-processing..
+
+
+src/utils/convicon
+------------------
+
+Converter to the image type used by the noise estimation code
+
+
+src/utils/srcmire_2
+-------------------
+
+This code is used to remove the vertical bands present in some videos.
+For more information see the corresponding IPOL publication:
+
+http://www.ipol.im/pub/art/2012/glmt-mire/
+
+
+src/1_preprocessing/ponomarenko
+-------------------------------
+
+This code is used to estimate the standard deviation of the noise.
+For more information see the corresponding IPOL publication:
+
+https://www.ipol.im/pub/art/2013/45/
+
+
+src/2_stabilization/estadeo_1.1
+-------------------------------
+
+This code is used to stabilize motion in the video.
+For more information see the corresponding IPOL publication:
+
+http://www.ipol.im/pub/art/2017/209/
+
+
+src/2_stabilization/tvl1flow_3
+------------------------------
+
+This code is used to estimate the motion in the sequence.
+For more information see the corresponding IPOL publication:
+
+http://www.ipol.im/pub/art/2013/26/
+
+The code here is a slightly modified version which receives 
+an additional input argument fscale (finest scale). This 
+parameter allows to specify the finest scale used by the 
+tvl1 algorithm. fscale=0 refers to the original image. 
+fscale=1 computes the flow in the pyramid until scale 1 (half
+of the original resolution for a zoom factor of 0.5). Etc.
+
+
+src/4_denoising/[any-denoiser]
+------------------------------
+
+Denosing methods. Currently we have:
 
 
 
@@ -107,5 +203,22 @@ denoising codes).
 Some codes have an individual README file explaining how to compile it. In this
 case follow the instructions given in the README file. If there's no readme file,
 just type make in the projects folder.
+
+
+# projects compiled with make
+$ cd src/utils/convicon; make -j; cd ../../..
+$ cd src/utils/imscript; make -j; cd ../../..
+$ cd src/utils/srcmire_2; make -j; cd ../../..
+$ cd src/1_preprocessing/ponomarenko; make -j; cd ../../..
+$ cd src/2_stabilization/estadeo_1.1; make -j; cd ../../..
+$ cd src/2_stabilization/tvl1flow_3; make -j; cd ../../..
+
+# projects compiled with cmake
+$ cd src/4_denoising/[any-denoisier]
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make -j
+$ cd ../../../..
 
 
