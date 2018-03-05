@@ -12,10 +12,6 @@ then
 	exit 1
 fi
 
-F=${2:-1} # first frame
-L=${3:-0} # last frame 
-
-SEQUENCE=$1
 
 echo "Running full pipeline for sequence $SEQUENCE"
 

@@ -31,9 +31,8 @@ cp output_data/1_preprocessing/$SEQUENCE/sigma.txt $INPUT_DIR/
 # nldct
 ./41_run_nldct_denoising.sh $SEQUENCE $F $L
 
-# nlbayes
-# ./41_run_nlbayes_denoising.sh $SEQUENCE $F $L
+# backward nl-kalman
+./41_run_nlkalmanbwd_denoising.sh $SEQUENCE $F $L
 
-# r-nlbayes
-
-# etc...
+# recursive bilateral filter
+./41_run_rbilf_denoising.sh $SEQUENCE $F $L
