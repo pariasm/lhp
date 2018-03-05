@@ -31,7 +31,7 @@ do
 	file=$(printf $INPUT_DIR"/occ.%03d.b.1.00.png" $i)
 	if [ ! -f $file ]
 	then
-		echo "$PLAMBDA $(printf $OUTPUT_DIR/%03d.b.flo $i) \" x(0,0)[0] x(-1,0)[0] - x(0,0)[1] x(0,-1)[1] - + fabs 1.0 > 255 * \" -o $file"
+		$PLAMBDA $(printf $OUTPUT_DIR/%03d.b.flo $i) " x(0,0)[0] x(-1,0)[0] - x(0,0)[1] x(0,-1)[1] - + fabs 1.0 > 255 * " -o $file
 	fi
-done
+done | parallel
 

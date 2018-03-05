@@ -4,7 +4,7 @@ UNBAND   = $(addprefix  ub_,$(LINEAR))
 MASKED   = $(addprefix   m_,$(UNBAND))
 FILLED   = $(addprefix   s_,$(MASKED))
 
-all: $(FILLED)
+all: $(FILLED) clean
 
 # linearization: contrast change to achieve linear scaling of gray values
 lin_i%.tif: i%.tif
@@ -78,7 +78,7 @@ s_m_%.tif: m_%.tif
 	simpois -i $< -o $@ 2>/dev/null
 
 # cleanup
-clean:
+clean: $(FILLED)
 	$(RM) $(LINEAR) avg_lin.tif std_lin.tif ub_avg_lin.png avg_lin.png \
 	range.txt bands.tif ub_avg_lin.tif ub_lin_*.tif bands2d.tif \
-	m_ub_*.tif s_m_ub_*.tif std_ub_lin.tif global_mask.png
+	m_ub_*.tif std_ub_lin.tif global_mask.png

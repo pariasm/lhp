@@ -17,7 +17,7 @@ CAUSAL=-causal
 
 SEQUENCE=$1
 INPUT_DIR="output_data/2_stabilization/$SEQUENCE"
-OFLOW_DIR="output_data/3_oflow/$SEQUENCE"
+OFLOW_DIR="output_data/3_oflow_dw0.10/$SEQUENCE"
 if [ $PT == 1 ];
 then
 	OUTPUT_DIR="output_data/4_denoising/$SEQUENCE/nldct-8x1-wt${WT}$CAUSAL"

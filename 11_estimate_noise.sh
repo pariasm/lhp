@@ -49,5 +49,5 @@ done | parallel
 
 # compute average sigma
 awk '{s+=$1} END {print s/NR}' RS=" " $SIGMAS > $OUTPUT
-rm -f $INPUT_DIR/tmp.RGB $INPUT_DIR/tmp.RGB
+rm -f $INPUT_DIR/tmp.RGB $INPUT_DIR/tmp.tif
 
