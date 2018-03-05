@@ -18,27 +18,10 @@ OUTPUT="$INPUT_DIR/sigma.txt"
 
 echo "	Estimating noise for sequence $SEQUENCE. Output stored in $OUTPUT"
 
-
-# determine extension
-FF=$(printf %03d $F)
-if [ -f "input_data/${SEQUENCE}/${FF}.tif" ]
-then
-	EXT="tif"
-elif [ -f "input_data/${SEQUENCE}/${FF}.tiff" ]
-then
-	EXT="tiff"
-elif [ -f "input_data/${SEQUENCE}/${FF}.png" ]
-then
-	EXT="png"
-else
-	echo "File ${SEQUENCE}/${FF}.{tif,tiff,png} not found"
-	exit 1
-fi
-
 # determine last frame
 if [ $L -lt 1 ];
 then
-	L=$(ls $INPUT_DIR/???.$EXT | wc -l)
+	L=$(ls $INPUT_DIR/???.tif | wc -l)
 fi
 
 PONO=src/1_preprocessing/ponomarenko/ponomarenko
