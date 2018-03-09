@@ -115,6 +115,8 @@ lhp
 SOURCE CODE COMPONENTS
 ======================
 
+We provide a brief description of all the components of the code. Each of these
+
 src/utils/imscript
 ------------------
 
@@ -132,8 +134,13 @@ Only the following utilities are used:
 - downsa     - downsample
 - upsa       - upsample 
 
-downsa and upsa are used to downscale and upscale the video. The rest are used 
-for the noise pre-processing..
+Most of them are required for the noise pre-processing step.
+downsa and upsa are used to downscale and upscale the video.
+plambda is used for several things (from applying a log, to computing the
+divergence of the optical flow). plambda lines can be a bit difficult to 
+read. A detailed description about plamda can be found here:
+
+http://dev.ipol.im/~coco/website/plambda.html
 
 
 src/1_preprocessing/srcmire_2
@@ -211,7 +218,7 @@ $ cd src/1_preprocessing/convicon; make -j; cd ../../..
 $ cd src/1_preprocessing/srcmire_2; make -j; cd ../../..
 $ cd src/1_preprocessing/ponomarenko; make -j; cd ../../..
 $ cd src/2_stabilization/estadeo_1.1; make -j; cd ../../..
-$ cd src/2_stabilization/tvl1flow_3; make -j; cd ../../..
+$ cd src/3_oflow/tvl1flow_3; make -j; cd ../../..
 
 # projects compiled with cmake
 $ cd src/4_denoising/[any-denoisier]
