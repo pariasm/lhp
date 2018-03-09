@@ -142,8 +142,8 @@ src/utils/convicon
 Converter to the image type used by the noise estimation code
 
 
-src/utils/srcmire_2
--------------------
+src/1_preprocessing/srcmire_2
+-----------------------------
 
 This code is used to remove the vertical bands present in some videos.
 For more information see the corresponding IPOL publication:
@@ -208,7 +208,7 @@ just type make in the projects folder.
 # projects compiled with make
 $ cd src/utils/convicon; make -j; cd ../../..
 $ cd src/utils/imscript; make -j; cd ../../..
-$ cd src/utils/srcmire_2; make -j; cd ../../..
+$ cd src/1_preprocessing/srcmire_2; make -j; cd ../../..
 $ cd src/1_preprocessing/ponomarenko; make -j; cd ../../..
 $ cd src/2_stabilization/estadeo_1.1; make -j; cd ../../..
 $ cd src/2_stabilization/tvl1flow_3; make -j; cd ../../..
