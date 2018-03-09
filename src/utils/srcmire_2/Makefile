@@ -73,7 +73,5 @@ $(BIN): $(OBJ) $(LIBDEPS)
 .PHONY	: clean distclean
 clean	:
 	$(RM) $(OBJ)
-	$(MAKE) -C ./io_png/libs $@
 distclean	: clean
 	$(RM) $(BIN)
-	$(MAKE) -C ./io_png/libs $@
