@@ -25,7 +25,7 @@ then
 fi
 
 PONO=src/1_preprocessing/ponomarenko/ponomarenko
-CONVICON=src/utils/convicon/bin/convicon
+CONVICON=src/1_preprocessing/convicon/bin/convicon
 
 # step (only run ponomarenko in 1/S of the frames)
 S=10
