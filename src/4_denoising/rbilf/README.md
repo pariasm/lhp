@@ -42,21 +42,21 @@ After building you'll find in the build/bin/ the following files:
 
 ```
 tvl1flow
-vnlmeans
-vnlm-gt.sh
-vnlm-mp4.sh
+rbilf
+rbilf-gt.sh
+rbilf-mp4.sh
 psnr.sh
 ```
 
-vnlmeans is the denoising algorithm. Run `vnlmeans -h` for more help. The
-scripts are necessary because vnlmeans only does denoising, meanining it
+rbilf is the denoising algorithm. Run `rbilf -h` for more help. The
+scripts are necessary because rbilf only does denoising, meanining it
 doesn't compute the optical flow (which optional but highly recommended), add
 noise or compute the psnr. 
 
-`vnlm-mp4.sh`:	call vnlm-gt.sh but receiving and output mp4 videos. Requires
+`rbilf-mp4.sh`:	call rbilf-gt.sh but receiving and output mp4 videos. Requires
 `avconv` or `ffmpeg` to be installed.
 
-`vnlm-gt.sh`: run vnlmeans and compare the output with the ground truth.
+`rbilf-gt.sh`: run rbilf and compare the output with the ground truth.
 1. adds noise (requires `awgn` from imscript)
 2. computes optical flow (requires `downsa` and `upsa` from impscript)
 3. computes the psnr of the output (requires from impscript `plambda`, `crop`,
@@ -68,43 +68,49 @@ Example
 -------
 
 ```
-$ bin/vnlm-gt.sh \
+$ bin/rbilf-gt.sh \
 		/path/to/sequence/%03d.png \
 		first-frame last-frame sigma output-dir \
-		"string with the params for vnlmeans"
+		"string with the params for rbilf"
 ```
 
 For example:
 ```
-bin/vnlm-gt.sh ~/my-seq/%03d.png 1 30 20 parkjoy2 "-p 8 -w 10 -v"
+bin/rbilf-gt.sh /path/to/sequence/bus/%03d.png 1 15 20 bus "-w 3 -v --whx 30"
 ```
 
-
-This will (first add noise) and denoise a sequence of 30 png files.
+This will add noise to the sequence bus, compute the optical flow and then
+denoise it. The output will be stored in the bus folder.
 It will produce the following output to stdout:
 
 ```
-/home/user/projects/rnlmeans/build/bin/vnlmeans -i parkjoy2/n%04d.tif -o parkjoy2/%04d_b.flo -f 1 -l 30 -s 20 -d parkjoy2/d%04d.tif -p 8 -w 10 -v
+/home/pariasm/Work/denoising/projects/rbilf/build/bin/rbilf -i bus/n%04d.tif -o bus/%04d_b.flo -f 1 -l 15 -s 20 -d bus/d%04d.tif -v --whx 30 -w 3
 parameters:
-    noise  20.000000
-    patch-wise mode
-    patch     8
-    search    10
-    w_hx      17
-    w_hd      -nan
-    w_thx     0.05
-    w_ht      27
-    w_htv     27
-    lambda    1
-    tv_lambda 0.85
+	noise  20.000000
+	search    3
+	w_hx      30
+	w_hd      1.6
+	w_thx     0.05
+	w_ht      14
+	lambda_x  0.1
+	lambda_t  0.5
 
-WEIGHTED_AGGREGATION ON
-AGGREGATE_TRANSITION_VAR ON
-loading video parkjoy2/n%04d.tif
-loading flow parkjoy2/%04d_b.flo
+loading video bus/n%04d.tif
+loading flow bus/%04d_b.flo
 processing frame 1
 processing frame 2
 processing frame 3
-...
-(etcera)
+processing frame 4
+processing frame 5
+processing frame 6
+processing frame 7
+processing frame 8
+processing frame 9
+processing frame 10
+processing frame 11
+processing frame 12
+processing frame 13
+processing frame 14
+processing frame 15
+
 ```

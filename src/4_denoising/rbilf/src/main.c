@@ -7,8 +7,6 @@
 #include <math.h>       // expf, nans (used as boundary value by bicubic interp)
 #include <string.h>
 
-// some macros and data types [[[1
-
 #define FLT_HUGE 1e10
 
 // read/write image sequence [[[1
@@ -140,19 +138,19 @@ void warp_bicubic_inplace(float *imw, float *im, float *of, int w, int h, int ch
 // recursive nl-means parameters [[[1
 
 // struct for storing the parameters of the algorithm
-struct vnlmeans_params
+struct rbilf_params
 {
 	int search_sz;       // search window radius
 	float weights_hx;    // spatial patch similarity weights parameter
 	float weights_hd;    // spatial distance weights parameter (for bilateral)
 	float weights_thx;   // spatial weights threshold
 	float weights_ht;    // temporal patch similarity weights parameter
-	float dista_lambda;  // weight of current frame in patch distance
-	float tv_lambda;     // weight of current frame in patch distance
+	float lambda_x;  // weight of current frame in patch distance
+	float lambda_t;     // weight of current frame in patch distance
 };
 
 // set default parameters as a function of sigma
-void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
+void rbilf_default_params(struct rbilf_params * p, float sigma)
 {
 	// the parameters are based on the following parameters
 	// found with a parameter search:
@@ -166,26 +164,20 @@ void vnlmeans_default_params(struct vnlmeans_params * p, float sigma)
 	if (p->search_sz    < 0) p->search_sz    = 3*p->weights_hd;
 	if (p->weights_thx  < 0) p->weights_thx  = .05f;
 	if (p->weights_ht   < 0) p->weights_ht   = 0.7 * sigma;
-	if (p->tv_lambda    < 0) p->tv_lambda    = 0.5;
-	if (p->dista_lambda < 0)
-		p->dista_lambda = fmax(0, fmin(0.2, 0.1 - (sigma - 20)/400));
+	if (p->lambda_t     < 0) p->lambda_t    = 0.5;
+	if (p->lambda_x < 0)
+		p->lambda_x = fmax(0, fmin(0.2, 0.1 - (sigma - 20)/400));
 
 	// limit search region to prevent too long running times
 	p->search_sz = fmin(15, fmin(3*p->weights_hd, p->search_sz));
 }
 
 // recursive bilateral filter for frame t [[[1
-/* This is a particular case of the vnlmeans_kalman_frame in which we assume
- * that the patch size is 1. In this implementation we removed all loops over
- * the patch domain, and as a result is slightly faster. This version won't be
- * mantained for the moment. The most up-to-date code will be the
- * vnlmeans_kalman_frame. */
 void rbilateral_filter_frame(float *deno1, float *nisy1, float *deno0,
 		int w, int h, int ch, float sigma,
-		const struct vnlmeans_params prms, int frame)
+		const struct rbilf_params prms, int frame)
 {
 	// definitions [[[2
-
 	const float weights_hx2  = prms.weights_hx * prms.weights_hx;
 	const float weights_hd2  = prms.weights_hd * prms.weights_hd * 2;
 	const float weights_ht2  = prms.weights_ht * prms.weights_ht;
@@ -216,48 +208,48 @@ void rbilateral_filter_frame(float *deno1, float *nisy1, float *deno0,
 			for (int qy = wy[0]; qy < wy[1]; ++qy)
 			for (int qx = wx[0]; qx < wx[1]; ++qx)
 			{
-				// compute patch distance [[[4
-				float ww = 0;
-				const float l = prms.dista_lambda;
+				// compute pixel distance [[[4
+				float alpha = 0;
+				const float l = prms.lambda_x;
 				if (d0 && l != 1 && !isnan(d0[qy][qx][0]) && !isnan(d0[py][px][0]))
 					// use noisy and denoised patches from previous frame
 					for (int c = 0; c < ch ; ++c)
 					{
 						const float eN1 = n1[qy][qx][c] - n1[py][px][c];
 						const float eD0 = d0[qy][qx][c] - d0[py][px][c];
-						ww += l * eN1 * eN1 + (1 - l) * eD0 * eD0;
+						alpha += l * eN1 * eN1 + (1 - l) * eD0 * eD0;
 					}
 				else
 					// use only noisy from previous frame
 					for (int c = 0; c < ch ; ++c)
 					{
 						const float eN1 = n1[qy][qx][c] - n1[py][px][c];
-						ww += eN1 * eN1;
+						alpha += eN1 * eN1;
 					}
 
 				// compute spatial similarity weight ]]]4[[[4
 				if (weights_hx2)
-					ww = expf(-1 / weights_hx2 * ww / (float)(ch));
+					alpha = expf(-1 / weights_hx2 * alpha / (float)(ch));
 				else
-					ww = (qx == px && qy == py) ? 1. : 0.;
+					alpha = (qx == px && qy == py) ? 1. : 0.;
 
 				if (weights_hd2 < FLT_HUGE)
 				{
 					if (weights_hd2)
 					{
 						const float dx = (px - qx), dy = (py - qy);
-						ww *= expf(-1 / weights_hd2 * (dx * dx + dy * dy) );
+						alpha *= expf(-1 / weights_hd2 * (dx * dx + dy * dy) );
 					}
 					else
-						ww = (qx == px && qy == py) ? 1. : 0.;
+						alpha = (qx == px && qy == py) ? 1. : 0.;
 				}
 
 				// accumulate on output pixel ]]]4[[[4
-				if (ww > prms.weights_thx)
+				if (alpha > prms.weights_thx)
 				{
-					cp += ww;
+					cp += alpha;
 					for (int c = 0; c < ch; ++c)
-						D1[c] += n1[qy][qx][c] * ww;
+						D1[c] += n1[qy][qx][c] * alpha;
 				}// ]]]4
 			}
 		}
@@ -278,30 +270,25 @@ void rbilateral_filter_frame(float *deno1, float *nisy1, float *deno0,
 		// temporal average with frame t-1 [[[3
 		if (d0 && !isnan(d0[py][px][0]))
 		{
-			// estimate transition variance
-			float v01xy = 0.;
-			const float l01 = prms.tv_lambda;
+			// estimate temporal weight
+			float beta = 0.;
+			const float l01 = prms.lambda_t;
 			for (int c = 0; c < ch; ++c)
 			{
 				const float eD = d1[py][px][c] - d0[py][px][c];
 				const float eN = n1[py][px][c] - d0[py][px][c];
-				v01xy += l01 * fmax(eN * eN - sigma2, 0.f) + (1 - l01) * eD * eD;
+				beta += l01 * fmax(eN * eN - sigma2, 0.f) + (1 - l01) * eD * eD;
 			}
 
-			// normalize variance estimate
-			v01xy /= (float)ch;
+			// normalize by number of channels
+			beta /= (float)ch;
 
-			// compute variance multiplier
-			const float w01xy = fmin(1, fmax(0, expf( - 1./weights_ht2 * v01xy )));
-
-//			// no variances: we assume that v0 = v1
-//			const float f = fmin(1., fmax(0., 1./(1. + w01xy)));
-			// no variances: we assume that v0 = (1 - w01)v1
-			const float f = 1. - w01xy;
+			// compute exponential weights
+			beta = fmin(1, fmax(0, expf( - 1./weights_ht2 * beta )));
 
 			// update pixel value
 			for (int c = 0; c < ch; ++c)
-				d1[py][px][c] = d0[py][px][c] * (1 - f) + d1[py][px][c] * f;
+				d1[py][px][c] = d0[py][px][c] * beta + d1[py][px][c] * (1 - beta);
 		}
 	}
 
@@ -313,8 +300,8 @@ void rbilateral_filter_frame(float *deno1, float *nisy1, float *deno0,
 
 // 'usage' message in the command line
 static const char *const usages[] = {
-	"vnlmeans [options] [[--] args]",
-	"vnlmeans [options]",
+	"rbilf [options] [[--] args]",
+	"rbilf [options]",
 	NULL,
 };
 
@@ -329,32 +316,32 @@ int main(int argc, const char *argv[])
 	int fframe = 0, lframe = -1;
 	float sigma = 0.f;
 	bool verbose = false;
-	struct vnlmeans_params prms;
+	struct rbilf_params prms;
 	prms.search_sz    = -1;
 	prms.weights_hx   = -1.; // -1 means automatic value
 	prms.weights_hd   = -1.;
 	prms.weights_thx  = -1.;
 	prms.weights_ht   = -1.;
-	prms.dista_lambda = -1.;
-	prms.tv_lambda    = -1.;
+	prms.lambda_x     = -1.;
+	prms.lambda_t     = -1.;
 
 	// configure command line parser
 	struct argparse_option options[] = {
 		OPT_HELP(),
 		OPT_GROUP("Algorithm options"),
-		OPT_STRING ('i', "nisy"  , &nisy_path, "noisy input path (printf format)"),
-		OPT_STRING ('o', "flow"  , &flow_path, "backward flow path (printf format)"),
-		OPT_STRING ('d', "deno"  , &deno_path, "denoised output path (printf format)"),
-		OPT_INTEGER('f', "first" , &fframe, "first frame"),
-		OPT_INTEGER('l', "last"  , &lframe , "last frame"),
-		OPT_FLOAT  ('s', "sigma" , &sigma, "noise standard dev"),
-		OPT_INTEGER('w', "search", &prms.search_sz, "search region radius"),
-		OPT_FLOAT  ( 0 , "whx"   , &prms.weights_hx, "spatial patch sim. weights param"),
-		OPT_FLOAT  ( 0 , "whd"   , &prms.weights_hd, "spatial distance weights param"),
-		OPT_FLOAT  ( 0 , "wthx"  , &prms.weights_thx, "spatial weights threshold"),
-		OPT_FLOAT  ( 0 , "wht"   , &prms.weights_ht, "temporal patch sim. weights param"),
-		OPT_FLOAT  ( 0 , "lambda", &prms.dista_lambda, "noisy patch weight in patch distance"),
-		OPT_FLOAT  ( 0 , "lambtv", &prms.tv_lambda, "noisy patch weight in transition variance"),
+		OPT_STRING ('i', "nisy"   , &nisy_path, "noisy input path (printf format)"),
+		OPT_STRING ('o', "flow"   , &flow_path, "backward flow path (printf format)"),
+		OPT_STRING ('d', "deno"   , &deno_path, "denoised output path (printf format)"),
+		OPT_INTEGER('f', "first"  , &fframe, "first frame"),
+		OPT_INTEGER('l', "last"   , &lframe , "last frame"),
+		OPT_FLOAT  ('s', "sigma"  , &sigma, "noise standard dev"),
+		OPT_INTEGER('w', "search" , &prms.search_sz, "search region radius"),
+		OPT_FLOAT  ( 0 , "whx"    , &prms.weights_hx, "spatial pixel sim. weights param"),
+		OPT_FLOAT  ( 0 , "whd"    , &prms.weights_hd, "spatial distance weights param"),
+		OPT_FLOAT  ( 0 , "wthx"   , &prms.weights_thx, "spatial weights threshold"),
+		OPT_FLOAT  ( 0 , "wht"    , &prms.weights_ht, "temporal pixel sim. weights param"),
+		OPT_FLOAT  ( 0 , "lambdax", &prms.lambda_x, "noisy pixel weight in spatial pixel distance"),
+		OPT_FLOAT  ( 0 , "lambdat", &prms.lambda_t, "noisy pixel weight in temporal pixel distance"),
 		OPT_GROUP("Program options"),
 		OPT_BOOLEAN('v', "verbose", &verbose, "verbose output"),
 		OPT_END(),
@@ -363,11 +350,11 @@ int main(int argc, const char *argv[])
 	// parse command line
 	struct argparse argparse;
 	argparse_init(&argparse, options, usages, 0);
-	argparse_describe(&argparse, "\nA video denoiser based on non-local means.", "");
+	argparse_describe(&argparse, "\nVideo denoiser based on recursive bilateral filter.", "");
 	argc = argparse_parse(&argparse, argc, argv);
 
 	// default value for noise-dependent params
-	vnlmeans_default_params(&prms, sigma);
+	rbilf_default_params(&prms, sigma);
 
 	// print parameters
 	if (verbose)
@@ -379,8 +366,8 @@ int main(int argc, const char *argv[])
 		printf("\tw_hd      %g\n", prms.weights_hd);
 		printf("\tw_thx     %g\n", prms.weights_thx);
 		printf("\tw_ht      %g\n", prms.weights_ht);
-		printf("\tlambda    %g\n", prms.dista_lambda);
-		printf("\ttv_lambda %g\n", prms.tv_lambda);
+		printf("\tlambda_x  %g\n", prms.lambda_x);
+		printf("\tlambda_t  %g\n", prms.lambda_t);
 		printf("\n");
 	}
 
@@ -424,8 +411,6 @@ int main(int argc, const char *argv[])
 	for (int f = fframe; f <= lframe; ++f)
 	{
 		if (verbose) printf("processing frame %d\n", f);
-
-		// TODO compute optical flow if absent
 
 		// warp previous denoised frame
 		if (f > fframe)

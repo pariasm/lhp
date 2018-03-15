@@ -12,8 +12,6 @@ PRM="${6}" # denoiser parameters
 #OUT=$OUT/s$SIG
 mkdir -p $OUT
 
-echo $PRM
-
 # we assume that the binaries are in the same folder as the script
 DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
