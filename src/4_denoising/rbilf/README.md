@@ -1,10 +1,10 @@
-Video denoising based on NL-means
-=================================
+Video denoising with a recursive bilateral filter
+=================================================
 
-Implementation of a recursive version of nl-means for video denoising.
+Implementation of a recursive version of the bilateral filter for video denoising.
 
 * Author    : Pablo Arias <pariasm@gmail.com>
-* Copyright : (C) 2015 IPOL Image Processing On Line http://www.ipol.im/
+* Copyright : (C) 2018 IPOL Image Processing On Line http://www.ipol.im/
 * Licence   : GPL v3+, see GPLv3.txt
 
 
