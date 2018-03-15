@@ -1,5 +1,5 @@
 #!/bin/bash
-# Evals vnlm using ground truth
+# Evals rbilf using ground truth
 
 SEQ=$1 # sequence path
 FFR=$2 # first frame
@@ -93,10 +93,10 @@ cp $(printf $OUT"/%04d_b.flo" $((FFR+1))) $(printf $OUT"/%04d_b.flo" $FFR)
 
 # run denoising {{{1
 echo \
-$DIR/vnlmeans \
+$DIR/rbilf \
  -i $OUT"/n%04d.tif" -o $OUT"/%04d_b.flo" -f $FFR -l $LFR -s $SIG \
  -d $OUT"/d%04d.tif" $PRM
-$DIR/vnlmeans \
+$DIR/rbilf \
  -i $OUT"/n%04d.tif" -o $OUT"/%04d_b.flo" -f $FFR -l $LFR -s $SIG \
  -d $OUT"/d%04d.tif" $PRM
 

@@ -1,6 +1,6 @@
 cmake_policy(SET CMP0048 NEW) # avoid annoing warnings
 
-project(vnlmeans VERSION 1.0 LANGUAGES C)
+project(rbilf VERSION 1.0 LANGUAGES C)
 message(STATUS "Configuring main project: " ${PROJECT_NAME})
 
 # flags #######################################################################

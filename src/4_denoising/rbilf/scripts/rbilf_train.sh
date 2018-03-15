@@ -20,7 +20,7 @@ NISY="$SEQ/s${SIG}/%03d.tif"
 FLOW="$SEQ/s${SIG}/tvl1_%03d_b.flo"
 
 # run denoising
-../build/bin/vnlmeans \
+../build/bin/rbilf \
  -i $NISY -o $FLOW -f $FFR -l $LFR -s $SIG \
  -d $OUT"/deno_%03d.tif" $PRM
 

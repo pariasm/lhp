@@ -59,9 +59,9 @@ echo
 
 echo run rnlmeans denoising
 export OMP_NUM_THREADS=24 # set max number of threads
-echo $bindir/vnlm-gt.sh i%04d.png 1 $nframes $sigma . \
+echo $bindir/rbilf-gt.sh i%04d.png 1 $nframes $sigma . \
 	  "-p $px -w $wx --whx $hx --whd $hd --wht $ht --lambda $lambda -v"
-time $bindir/vnlm-gt.sh i%04d.png 1 $nframes $sigma . \
+time $bindir/rbilf-gt.sh i%04d.png 1 $nframes $sigma . \
 	  "-p $px -w $wx --whx $hx --whd $hd --wht $ht --lambda $lambda -v"
 echo
 
