@@ -22,5 +22,4 @@ export PATH=`pwd`/bin/:$PATH
 ./20_stabilize_video.sh $SEQUENCE $F $L
 ./30_compute_optical_flow.sh $SEQUENCE $F $L
 ./40_run_denoising.sh $SEQUENCE $F $L
-#./50_run_deblurring.sh $SEQUENCE $F $L
 

@@ -19,10 +19,8 @@ an input video acquired with a hand-held camera. The pipeline has the following 
 	- occlusion detection
 
 4/ Video denoising
-	- Video NL-Bayes
 	- NL-DCT
 	- Recursive bilateral filter
-	- Recursive NL-means filter
 	- Backward NL-Kalman filter
 
 5/ Video deblurring
