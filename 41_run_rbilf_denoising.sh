@@ -29,11 +29,11 @@ echo "Output stored $OUTPUT_DIR"
 mkdir -p $OUTPUT_DIR
 
 # nldct binary
-DENO="src/4_denoising/rnlmeans/build/bin/vnlmeans"
+DENO="src/4_denoising/rbilf/build/bin/rbilf"
 SIGMA=$(cat "$INPUT_DIR/sigma.txt")
 
 # run denoising (first step)
 $DENO \
 -i ${INPUT_DIR}/%03d.tif -f $F -l $L -s $SIGMA -o ${OFLOW_DIR}/%03d.b.flo \
--p 1 -d ${OUTPUT_DIR}/d_%03d.tif -v
+-d ${OUTPUT_DIR}/d_%03d.tif -v
 
