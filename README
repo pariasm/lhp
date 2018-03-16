@@ -38,6 +38,7 @@ Pablo Arias, pablo.arias@cmla.ens-cachan.fr
 
 It uses code from the following authors:
 
+preprocess.mk                    - Enric Meinhardt-Llopis
 src/utils/imscript               - Enric Meinhardt-Llopis (main developer) and others 
                                    (see src/utils/imscript/AUTHORS file)
 src/1_preprocessing/srcmire_2    - Yohann Tendero
