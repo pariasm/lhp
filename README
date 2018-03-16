@@ -26,19 +26,31 @@ an input video acquired with a hand-held camera. The pipeline has the following 
 5/ Video deblurring
 
 
-DATASET
+AUTHORS
 =======
 
-L'H gave us 6 videos, summarized here:
+The pipeline contains code from several projects from different developers.
+The pipeline was put together by:
 
-id | frames | min     max   #values | comments                      | filename                         
-===| =======| ======================| ==============================| ==============================
-Z  | 233    | 10359 - 65283 650–720 | daylight test, almost no noise| origin/premiere_camera/ZIzghPzbNUdlSyH.mov
-5  | 274    | 0     - 65283     119 | very noisy, vertical artifacts| origin/premiere_camera/5taYHWaKAFF4t8M.mov
-p  | 512    | 0     - 65283      76 |                               | origin/premiere_camera/pFYGVaVHDADw4N1.mov
-J  | 321    | 0     - 65283      76 |                               | origin/premiere_camera/JXJF6vn2ODcnj0N.mov
-c  | 366    | 64    -   940 28 (54) | fixed cam, horizontal lines   | cam_fixe_cible_de_face_T399240us_G1256
-m  | 476    | 64    -   940 28 (54) | shaking cam                   | main_levee_cible_mobile_T399240us_G1256
+Pablo Arias, pablo.arias@cmla.ens-cachan.fr
+             https://github.com/pariasm
+
+
+It uses code from the following authors:
+
+src/utils/imscript               - Enric Meinhardt-Llopis (main developer) and others 
+                                   (see src/utils/imscript/AUTHORS file)
+src/1_preprocessing/srcmire_2    - Yohann Tendero
+src/1_preprocessing/ponomarenko  - Miguel Colom
+src/2_stabilization/estadeo_1.1  - Javier Sánchez Pérez
+src/3_oflow/tvl1flow_3           - Javier Sánchez Pérez
+                                 - Enric Meinhardt-Llopis
+											- Gabriele Facciolo
+src/4_denoising/bwd-nlkalman     - Pablo Arias
+src/4_denoising/nldct            - Pablo Arias
+src/4_denoising/rbilf            - Pablo Arias
+
+See the documentation of each project for more information.
 
 
 
