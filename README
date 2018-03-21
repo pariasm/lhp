@@ -39,11 +39,13 @@ Pablo Arias, pablo.arias@cmla.ens-cachan.fr
 It uses code from the following authors:
 
 preprocess.mk                    - Enric Meinhardt-Llopis
+                                 - Thibaud Ehret
 src/utils/imscript               - Enric Meinhardt-Llopis (main developer) and others 
                                    (see src/utils/imscript/AUTHORS file)
 src/1_preprocessing/srcmire_2    - Yohann Tendero
 src/1_preprocessing/ponomarenko  - Miguel Colom
 src/2_stabilization/estadeo_1.1  - Javier Sánchez Pérez
+                                 - Thibaud Ehret
 src/3_oflow/tvl1flow_3           - Javier Sánchez Pérez
                                  - Enric Meinhardt-Llopis
 											- Gabriele Facciolo
