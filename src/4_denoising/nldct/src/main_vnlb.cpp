@@ -324,7 +324,7 @@ int main(int argc, char **argv)
 	if (verbose) printf("\nSaving output sequences\n");
 
 	if (prms2.sizePatch) final.saveVideo(final_path, firstFrame, frameStep);
-	if (prms2.sizePatch) basic.saveVideo(basic_path, firstFrame, frameStep);
+	if (prms1.sizePatch) basic.saveVideo(basic_path, firstFrame, frameStep);
 
 	if (verbose) printf("Done\n");
 	return EXIT_SUCCESS;
